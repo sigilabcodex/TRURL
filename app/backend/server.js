@@ -48,12 +48,60 @@ function parseYamlLikeBlock(block) {
 function extractFrontmatter(raw) {
   const frontmatterMatch = raw.match(/^---\n([\s\S]*?)\n---\n?/);
   if (!frontmatterMatch) {
-    return { frontmatter: {}, body: raw.trim() };
+    return { frontmatter: {}, body: raw };
   }
 
   const frontmatter = parseYamlLikeBlock(frontmatterMatch[1]);
-  const body = raw.slice(frontmatterMatch[0].length).trim();
+  const body = raw.slice(frontmatterMatch[0].length);
   return { frontmatter, body };
+}
+
+function getRawFrontmatterBlock(raw) {
+  const frontmatterMatch = raw.match(/^---\n[\s\S]*?\n---\n?/);
+  return frontmatterMatch ? frontmatterMatch[0] : '';
+}
+
+function validateManuscriptPath(relativePath) {
+  if (typeof relativePath !== 'string' || !relativePath.endsWith('.md')) {
+    throw new Error('Path must be a markdown file under manuscript/.');
+  }
+
+  const normalizedPath = relativePath.replace(/\\/g, '/');
+  if (!normalizedPath.startsWith('manuscript/')) {
+    throw new Error('Path must stay inside manuscript/.');
+  }
+
+  const absolutePath = path.resolve(repoRoot, normalizedPath);
+  const manuscriptRoot = path.resolve(repoRoot, 'manuscript') + path.sep;
+  if (!absolutePath.startsWith(manuscriptRoot)) {
+    throw new Error('Path traversal outside manuscript/ is not allowed.');
+  }
+
+  return { normalizedPath, absolutePath };
+}
+
+async function saveManuscriptBody(relativePath, body) {
+  if (typeof body !== 'string') {
+    throw new Error('Body must be a string.');
+  }
+
+  const { normalizedPath, absolutePath } = validateManuscriptPath(relativePath);
+  const raw = await fs.readFile(absolutePath, 'utf8');
+  const frontmatterBlock = getRawFrontmatterBlock(raw);
+  const updatedRaw = `${frontmatterBlock}${body}`;
+  await fs.writeFile(absolutePath, updatedRaw, 'utf8');
+
+  return { path: normalizedPath };
+}
+
+async function readJsonBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+
+  const raw = Buffer.concat(chunks).toString('utf8');
+  return raw ? JSON.parse(raw) : {};
 }
 
 async function readMarkdownDirectory(relativeDir) {
@@ -163,6 +211,20 @@ const server = http.createServer(async (req, res) => {
     } catch (error) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Failed to load local workspace.', detail: error.message }));
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/save-manuscript') {
+    try {
+      const payload = await readJsonBody(req);
+      const result = await saveManuscriptBody(payload.path, payload.body);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, ...result }));
+    } catch (error) {
+      const status = /Path|Body|JSON/.test(error.message) ? 400 : 500;
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: error.message }));
     }
     return;
   }

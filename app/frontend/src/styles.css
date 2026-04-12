@@ -140,6 +140,46 @@ body {
   line-height: 1.5;
 }
 
+.chapter-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chapter-content-header h3 {
+  margin: 0;
+}
+
+.chapter-controls {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.chapter-controls button {
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  border-radius: 7px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
+.chapter-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dirty-indicator {
+  font-size: 0.75rem;
+  color: #475467;
+}
+
+.dirty-indicator.dirty {
+  color: #b54708;
+  font-weight: 600;
+}
+
 .chapter-meta {
   display: flex;
   gap: 0.5rem;
@@ -159,6 +199,17 @@ body {
   margin: 0;
   white-space: pre-wrap;
   font: inherit;
+}
+
+.chapter-editor {
+  width: 100%;
+  min-height: 420px;
+  resize: vertical;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 0.65rem;
+  font: inherit;
+  line-height: 1.5;
 }
 
 h2,
