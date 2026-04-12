@@ -1,46 +1,58 @@
-# TRURL Frontend (First Application Pass)
+# TRURL Frontend (Repository-Backed Pass)
 
-This directory contains a **minimal local-first editor surface scaffold** for TRURL.
-It is intentionally small and focused on validating UI direction, not product completeness.
+This pass upgrades the frontend from mocked data to a local repository viewer.
 
-## Stack Choice
+## Local Architecture
 
-- **Vite + React (JavaScript)**
+- `app/frontend` (Vite + React) renders the three-panel workspace UI.
+- `app/backend` (small Node HTTP service) reads Markdown files from the repository and exposes a JSON snapshot.
+- The repository remains the single source of truth; no database is introduced.
 
-Why this fits TRURL right now:
+## Data Flow
 
-- fast local startup and minimal tooling overhead
-- simple component model for panel-based manuscript/canon UI
-- easy to keep repository-first boundaries (UI can consume Markdown files later without forcing backend complexity)
-- maintainable for future contributors without introducing premature abstractions
+1. Backend reads Markdown files from:
+   - `manuscript/`
+   - `story-bible/characters/`
+   - `story-bible/locations/`
+   - `story-bible/timeline/`
+   - `notes/` and `revision/` (for section counts)
+2. Backend parses YAML frontmatter + Markdown body.
+3. Frontend requests `GET /api/workspace`.
+4. Frontend renders:
+   - real chapter list
+   - selected chapter body
+   - context panel resolved from `character_ids`, `location_ids`, `timeline_ids`
 
-## What is Included
+## What is Real in This Pass
 
-- three-panel application shell:
-  - left: repository sections
-  - center: manuscript/chapter mock editor view
-  - right: linked metadata/context
-- visible TRURL-aligned sections:
-  - Manuscript
-  - Story Bible
-  - Notes
-  - Revision
-  - AI
-  - Validation
-- mocked chapter list and chapter content
-- mocked linked metadata (characters, locations, timeline)
+- real manuscript discovery from local files
+- real frontmatter parsing (`id`, `title`, `type`, `order`, `status`, links, sources)
+- real chapter content display from Markdown body
+- real context resolution against story-bible IDs
+- repository section counts for manuscript/story bible/notes/revision
+- workspace state indicator with selected chapter path
 
-## What is Mocked (Not Implemented Yet)
+## What is Still Mocked / Deferred
 
-- no file I/O into `manuscript/` or `story-bible/`
-- no persistent editing state
-- no git operation wiring
-- no backend API
+- no write/save operations
+- no git branch/status operations (no fake branch indicator shown)
+- no validation action wiring from UI
 - no AI calls
+- no cloud sync/auth/multi-user features
 
-## Local Run
+## Run Locally
 
-From repository root:
+From repository root, in two terminals:
+
+### Terminal 1 — backend
+
+```bash
+cd app/backend
+npm install
+npm run dev
+```
+
+### Terminal 2 — frontend
 
 ```bash
 cd app/frontend
@@ -48,14 +60,4 @@ npm install
 npm run dev
 ```
 
-Then open the local Vite URL shown in terminal (typically `http://localhost:5173`).
-
-## Next Step (Recommended)
-
-Add a thin local data layer that reads repository Markdown/frontmatter into in-memory view models for:
-
-- chapter index
-- active chapter body
-- linked character/location/timeline references
-
-while still keeping Git and Markdown as the source of truth.
+Open the Vite URL shown in terminal (usually `http://localhost:5173`).
