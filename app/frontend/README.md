@@ -28,17 +28,21 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 - real manuscript discovery from local files
 - real frontmatter parsing (`id`, `title`, `type`, `order`, `status`, links, sources)
 - real chapter content display from Markdown body
+- read mode + explicit edit mode toggle for selected chapter body
+- save action for manuscript body text through backend write endpoint
+- dirty/unsaved state indicator while editing
 - real context resolution against story-bible IDs
 - repository section counts for manuscript/story bible/notes/revision
 - workspace state indicator with selected chapter path
 
 ## What is Still Mocked / Deferred
 
-- no write/save operations
 - no git branch/status operations (no fake branch indicator shown)
 - no validation action wiring from UI
 - no AI calls
 - no cloud sync/auth/multi-user features
+- no frontmatter editing in UI (body-only editing in this pass)
+- no rich text editing/toolbar/undo system
 
 ## Run Locally
 

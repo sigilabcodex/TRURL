@@ -44,27 +44,36 @@ function App() {
   const [workspace, setWorkspace] = useState(null);
   const [activeSection, setActiveSection] = useState('Manuscript');
   const [selectedChapterId, setSelectedChapterId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editorBody, setEditorBody] = useState('');
+  const [saveState, setSaveState] = useState('idle');
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function loadWorkspace() {
-      try {
-        const response = await fetch('/api/workspace');
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
-        }
-
-        const payload = await response.json();
-        setWorkspace(payload);
-
-        if (payload.chapters.length > 0) {
-          setSelectedChapterId(payload.chapters[0].id);
-        }
-      } catch (loadError) {
-        setError(loadError.message);
+  async function loadWorkspace(preferredChapterId = null) {
+    try {
+      const response = await fetch('/api/workspace');
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
       }
-    }
 
+      const payload = await response.json();
+      setWorkspace(payload);
+      setError(null);
+
+      if (payload.chapters.length === 0) {
+        setSelectedChapterId(null);
+        return;
+      }
+
+      const hasPreferred = preferredChapterId
+        && payload.chapters.some((chapter) => chapter.id === preferredChapterId);
+      setSelectedChapterId(hasPreferred ? preferredChapterId : payload.chapters[0].id);
+    } catch (loadError) {
+      setError(loadError.message);
+    }
+  }
+
+  useEffect(() => {
     loadWorkspace();
   }, []);
 
@@ -76,6 +85,46 @@ function App() {
     () => resolveLinkedEntities(selectedChapter, workspace?.entities),
     [selectedChapter, workspace],
   );
+
+  useEffect(() => {
+    if (selectedChapter) {
+      setEditorBody(selectedChapter.body);
+      setSaveState('idle');
+      setIsEditing(false);
+    }
+  }, [selectedChapterId, selectedChapter?.body, selectedChapter]);
+
+  const isDirty = selectedChapter ? editorBody !== selectedChapter.body : false;
+
+  async function handleSave() {
+    if (!selectedChapter || !isEditing) return;
+
+    setSaveState('saving');
+    setError(null);
+
+    try {
+      const response = await fetch('/api/save-manuscript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: selectedChapter.path,
+          body: editorBody,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || `Save failed (${response.status})`);
+      }
+
+      await loadWorkspace(selectedChapter.id);
+      setSaveState('saved');
+      setIsEditing(false);
+    } catch (saveError) {
+      setSaveState('idle');
+      setError(saveError.message);
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -112,7 +161,7 @@ function App() {
             <h3>Workspace State</h3>
             <p><strong>Section:</strong> {activeSection}</p>
             <p><strong>Selected:</strong> {selectedChapter?.path || 'none'}</p>
-            <p><strong>Local:</strong> repository-backed read mode</p>
+            <p><strong>Local:</strong> repository-backed {isEditing ? 'edit' : 'read'} mode</p>
           </div>
         </aside>
 
@@ -156,13 +205,38 @@ function App() {
             <article className="chapter-content">
               {selectedChapter ? (
                 <>
-                  <h3>{selectedChapter.title}</h3>
+                  <div className="chapter-content-header">
+                    <h3>{selectedChapter.title}</h3>
+                    <div className="chapter-controls">
+                      <span className={`dirty-indicator ${isDirty ? 'dirty' : ''}`}>
+                        {isDirty ? 'Unsaved changes' : saveState === 'saved' ? 'Saved' : 'No changes'}
+                      </span>
+                      <button type="button" onClick={() => setIsEditing((value) => !value)}>
+                        {isEditing ? 'Cancel' : 'Edit'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={!isEditing || !isDirty || saveState === 'saving'}
+                      >
+                        {saveState === 'saving' ? 'Saving…' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
                   <div className="chapter-meta">
                     <span>ID: {selectedChapter.id}</span>
                     <span>Type: {selectedChapter.type}</span>
                     <span>Status: {selectedChapter.status}</span>
                   </div>
-                  <pre>{selectedChapter.body}</pre>
+                  {isEditing ? (
+                    <textarea
+                      className="chapter-editor"
+                      value={editorBody}
+                      onChange={(event) => setEditorBody(event.target.value)}
+                    />
+                  ) : (
+                    <pre>{selectedChapter.body}</pre>
+                  )}
                 </>
               ) : (
                 <p>Select a manuscript chapter to view its content.</p>
