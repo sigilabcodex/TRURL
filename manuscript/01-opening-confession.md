@@ -6,7 +6,7 @@ order: 1
 status: revised
 character_ids:
   - char.narrator
-  - char.old-man
+  - char.the-old-man
 location_ids:
   - loc.old-man-house
 timeline_ids:

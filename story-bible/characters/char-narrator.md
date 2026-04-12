@@ -17,7 +17,7 @@ First-person speaker insisting on sanity while recounting a murder.
 - Eliminate the old man's eye.
 
 ## Relationships
-- `char.old-man`: caretaker/housemate turned victim.
+- `char.the-old-man`: caretaker/housemate turned victim.
 - `char.police-officers`: audience that triggers confession.
 
 ## Evidence

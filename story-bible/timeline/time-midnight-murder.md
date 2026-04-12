@@ -7,7 +7,7 @@ status: fixed
 canon: canonical
 character_ids:
   - char.narrator
-  - char.old-man
+  - char.the-old-man
 location_ids:
   - loc.old-man-house
 source_manuscript: manuscript/02-the-murder.md

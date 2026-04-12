@@ -1,5 +1,5 @@
 ---
-id: char.the-old-man
+id: char.old-man
 type: character
 name: "The Old Man"
 status: deceased
