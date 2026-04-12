@@ -1,72 +1,80 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://trurl.local/schema/document-schema.json",
-  "title": "TRURL Document Schema",
-  "description": "Minimal, extensible schema for TRURL manuscript and canon metadata.",
+  "title": "TRURL Frontmatter Schema (Draft)",
+  "description": "Minimal evolving schema for manuscript and story-bible frontmatter.",
   "type": "object",
-  "properties": {
-    "chapter_metadata": {
+  "oneOf": [
+    { "$ref": "#/$defs/manuscript" },
+    { "$ref": "#/$defs/character" },
+    { "$ref": "#/$defs/location" },
+    { "$ref": "#/$defs/timeline" }
+  ],
+  "$defs": {
+    "id_list": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "manuscript": {
       "type": "object",
       "properties": {
+        "id": { "type": "string", "pattern": "^ms\\..+" },
         "title": { "type": "string" },
-        "characters": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "location": { "type": "string" },
-        "timeline": { "type": "string" },
-        "status": { "type": "string" }
+        "type": { "type": "string", "enum": ["chapter", "interlude", "appendix", "fragment"] },
+        "order": { "type": "integer", "minimum": 1 },
+        "status": { "type": "string", "enum": ["draft", "revised", "locked", "deprecated"] },
+        "character_ids": { "$ref": "#/$defs/id_list" },
+        "location_ids": { "$ref": "#/$defs/id_list" },
+        "timeline_ids": { "$ref": "#/$defs/id_list" },
+        "source_text": { "type": "string" },
+        "source_url": { "type": "string" }
       },
-      "required": ["title", "characters", "location", "timeline", "status"],
+      "required": ["id", "title", "type", "order", "status", "character_ids", "location_ids", "timeline_ids"],
       "additionalProperties": true
     },
-    "character_metadata": {
+    "character": {
       "type": "object",
       "properties": {
+        "id": { "type": "string", "pattern": "^char\\..+" },
+        "type": { "const": "character" },
         "name": { "type": "string" },
-        "aliases": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "description": { "type": "string" },
-        "arc": { "type": "string" },
-        "first_appearance": { "type": "string" },
-        "status": { "type": "string" }
+        "status": { "type": "string" },
+        "canon": { "type": "string", "enum": ["canonical", "provisional"] },
+        "aliases": { "$ref": "#/$defs/id_list" },
+        "first_appearance": { "type": "string" }
       },
-      "required": ["name", "description", "status"],
+      "required": ["id", "type", "name", "status", "canon"],
       "additionalProperties": true
     },
-    "timeline_entries": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "label": { "type": "string" },
-          "description": { "type": "string" },
-          "related_characters": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
-        },
-        "required": ["id", "label"],
-        "additionalProperties": true
-      }
+    "location": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^loc\\..+" },
+        "type": { "const": "location" },
+        "name": { "type": "string" },
+        "status": { "type": "string" },
+        "canon": { "type": "string", "enum": ["canonical", "provisional"] },
+        "aliases": { "$ref": "#/$defs/id_list" },
+        "region": { "type": "string" }
+      },
+      "required": ["id", "type", "name", "status", "canon"],
+      "additionalProperties": true
     },
-    "notes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "topic": { "type": "string" },
-          "text": { "type": "string" },
-          "status": { "type": "string" }
-        },
-        "required": ["id", "text"],
-        "additionalProperties": true
-      }
+    "timeline": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^time\\..+" },
+        "type": { "const": "timeline" },
+        "label": { "type": "string" },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "status": { "type": "string" },
+        "canon": { "type": "string", "enum": ["canonical", "provisional"] },
+        "character_ids": { "$ref": "#/$defs/id_list" },
+        "location_ids": { "$ref": "#/$defs/id_list" },
+        "source_manuscript": { "type": "string" }
+      },
+      "required": ["id", "type", "label", "sequence", "status", "canon"],
+      "additionalProperties": true
     }
-  },
-  "additionalProperties": true
+  }
 }

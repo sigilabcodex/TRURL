@@ -15,25 +15,21 @@ The goal is not to replace authorship with automation. The goal is to create a s
 - **Refactoring over rewriting**: improve manuscripts with traceable transformations.
 - **Canon over improvisation**: continuity and lore integrity are first-class constraints.
 
-## Feature Goals
+## Operational Specs (Second Pass)
 
-- Repository-first manuscript authoring
-- Story bible and continuity metadata management
-- Branch-based rewriting and experimental narrative paths
-- AI-assisted editing and structural refactoring
-- Canon-aware consistency checks
-- Future browser-based interface without breaking local/offline workflow
+- `docs/spec/MANUSCRIPT_CONVENTIONS.md`
+- `docs/spec/STORY_BIBLE_CONVENTIONS.md`
+- `docs/spec/FRONTMATTER.md`
+- `docs/spec/WORKFLOW.md`
+- `docs/spec/SAMPLE_CORPUS.md`
 
-## Architecture Overview
+## Validation Scripts
 
-TRURL starts as a repository architecture, then grows into toolchains and services:
+Run from repository root:
 
-1. **Repository layer**: Markdown files, schema drafts, and scripts
-2. **Metadata layer**: frontmatter and canon documents
-3. **Automation layer**: AI and validation scripts operating via Git diffs
-4. **Application layer (future)**: frontend editor + backend GitHub bridge
-
-The repository must remain fully usable without the web app. The web app is an optional control surface, not the source of truth.
+- `python3 scripts/validate_frontmatter.py`
+- `python3 scripts/check_crossrefs.py`
+- `python3 scripts/check_manuscript_order.py`
 
 ## Folder Layout
 
