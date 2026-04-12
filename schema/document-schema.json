@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trurl.local/schema/document-schema.json",
+  "title": "TRURL Document Schema",
+  "description": "Minimal, extensible schema for TRURL manuscript and canon metadata.",
+  "type": "object",
+  "properties": {
+    "chapter_metadata": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "characters": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "location": { "type": "string" },
+        "timeline": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["title", "characters", "location", "timeline", "status"],
+      "additionalProperties": true
+    },
+    "character_metadata": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": { "type": "string" },
+        "arc": { "type": "string" },
+        "first_appearance": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["name", "description", "status"],
+      "additionalProperties": true
+    },
+    "timeline_entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "related_characters": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["id", "label"],
+        "additionalProperties": true
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "topic": { "type": "string" },
+          "text": { "type": "string" },
+          "status": { "type": "string" }
+        },
+        "required": ["id", "text"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
