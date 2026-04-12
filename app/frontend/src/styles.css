@@ -1,0 +1,143 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #101828;
+  background: #f6f8fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid #d0d5dd;
+  background: #ffffff;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1d4ed8;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr 300px;
+  gap: 0.8rem;
+  padding: 0.8rem;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+
+.sidebar ul,
+.metadata ul,
+.chapter-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 0.4rem;
+}
+
+.sidebar button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  border-radius: 7px;
+  padding: 0.45rem 0.55rem;
+  cursor: pointer;
+}
+
+.sidebar button.active {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.chapter-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0.8rem;
+}
+
+.chapter-list li {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.chapter-list li.selected {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.chapter-list span {
+  display: block;
+  font-size: 0.75rem;
+  color: #475467;
+  margin-top: 0.2rem;
+}
+
+.chapter-content {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 0.7rem;
+  line-height: 1.5;
+}
+
+h2,
+h3 {
+  margin-top: 0;
+}
+
+.metadata section {
+  margin-bottom: 1rem;
+}
+
+.metadata li {
+  padding: 0.2rem 0;
+}
+
+@media (max-width: 1000px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chapter-layout {
+    grid-template-columns: 1fr;
+  }
+}
