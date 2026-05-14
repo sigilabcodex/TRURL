@@ -8,6 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..', '..');
 const defaultOutputPath = path.join(repoRoot, 'exports', 'editorial', 'manuscript.html');
+const stylesheetSourcePath = path.join(__dirname, 'editorial.css');
+const stylesheetFileName = 'editorial.css';
 
 function escapeHtml(value) {
   return String(value)
@@ -75,62 +77,7 @@ function renderDocument(chapters) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TRURL Manuscript</title>
   <meta name="generator" content="TRURL editorial HTML renderer">
-  <style>
-    body {
-      margin: 0 auto;
-      max-width: 72ch;
-      padding: 3rem 1.5rem;
-      color: #111827;
-      font-family: Georgia, "Times New Roman", serif;
-      line-height: 1.6;
-    }
-
-    .document-title,
-    .table-of-contents,
-    .trurl-chapter {
-      margin-bottom: 4rem;
-    }
-
-    .chapter-kicker,
-    .chapter-meta {
-      color: #4b5563;
-      font-family: system-ui, sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 0;
-      text-transform: uppercase;
-    }
-
-    .chapter-meta {
-      display: grid;
-      grid-template-columns: max-content 1fr;
-      gap: 0.25rem 0.75rem;
-      text-transform: none;
-    }
-
-    img {
-      display: block;
-      height: auto;
-      max-width: 100%;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th,
-    td {
-      border: 1px solid #d1d5db;
-      padding: 0.35rem 0.5rem;
-      text-align: left;
-    }
-
-    pre {
-      overflow-x: auto;
-      padding: 1rem;
-      background: #f3f4f6;
-    }
-  </style>
+  <link rel="stylesheet" href="${stylesheetFileName}">
 </head>
 <body>
   <header class="document-title">
@@ -158,6 +105,7 @@ async function main() {
 
   await fs.mkdir(path.dirname(output), { recursive: true });
   await fs.writeFile(output, html, 'utf8');
+  await fs.copyFile(stylesheetSourcePath, path.join(path.dirname(output), stylesheetFileName));
 
   console.log(`Rendered ${chapters.length} manuscript chapter(s) to ${path.relative(repoRoot, output)}`);
 }
