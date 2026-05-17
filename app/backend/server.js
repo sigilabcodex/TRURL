@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createAiProvider } from './ai/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,6 +95,19 @@ async function saveManuscriptBody(relativePath, body) {
   return { path: normalizedPath };
 }
 
+async function loadManuscriptChapter(relativePath) {
+  const { normalizedPath, absolutePath } = validateManuscriptPath(relativePath);
+  const raw = await fs.readFile(absolutePath, 'utf8');
+  const { frontmatter, body } = extractFrontmatter(raw);
+
+  return {
+    path: normalizedPath,
+    title: frontmatter.title || path.basename(normalizedPath, '.md'),
+    frontmatter,
+    body,
+  };
+}
+
 async function readJsonBody(req) {
   const chunks = [];
   for await (const chunk of req) {
@@ -101,7 +115,11 @@ async function readJsonBody(req) {
   }
 
   const raw = Buffer.concat(chunks).toString('utf8');
-  return raw ? JSON.parse(raw) : {};
+  try {
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    throw new Error('Invalid JSON body.');
+  }
 }
 
 async function readMarkdownDirectory(relativeDir) {
@@ -129,6 +147,67 @@ function summarizeBody(body) {
     .split('\n')
     .map((line) => line.trim())
     .find((line) => line.length > 0 && !line.startsWith('#')) || 'No summary text available.';
+}
+
+function toEntityRecord(entry, kind) {
+  const meta = entry.frontmatter;
+  return {
+    id: meta.id || entry.path,
+    type: meta.type || kind,
+    name: meta.name || meta.label || entry.fileName,
+    label: meta.label || null,
+    status: meta.status || 'unknown',
+    canon: meta.canon || null,
+    first_appearance: meta.first_appearance || null,
+    source_manuscript: meta.source_manuscript || null,
+    path: entry.path,
+    summary: summarizeBody(entry.body),
+    body: entry.body,
+  };
+}
+
+const mapById = (records) => Object.fromEntries(records.map((record) => [record.id, record]));
+
+function resolveIds(ids, recordsById) {
+  return (Array.isArray(ids) ? ids : [])
+    .map((id) => recordsById[id])
+    .filter(Boolean);
+}
+
+async function loadLinkedStoryBibleEntities(frontmatter) {
+  const [characterRaw, locationRaw, timelineRaw] = await Promise.all([
+    readMarkdownDirectory(path.join('story-bible', 'characters')),
+    readMarkdownDirectory(path.join('story-bible', 'locations')),
+    readMarkdownDirectory(path.join('story-bible', 'timeline')),
+  ]);
+
+  const characters = mapById(characterRaw.map((entry) => toEntityRecord(entry, 'character')));
+  const locations = mapById(locationRaw.map((entry) => toEntityRecord(entry, 'location')));
+  const timeline = mapById(timelineRaw.map((entry) => toEntityRecord(entry, 'timeline')));
+
+  return {
+    characters: resolveIds(frontmatter.character_ids, characters),
+    locations: resolveIds(frontmatter.location_ids, locations),
+    timeline: resolveIds(frontmatter.timeline_ids, timeline),
+  };
+}
+
+async function summarizeChapter(relativePath) {
+  const chapter = await loadManuscriptChapter(relativePath);
+  const linkedEntities = await loadLinkedStoryBibleEntities(chapter.frontmatter);
+  const provider = createAiProvider();
+  const result = await provider.summarizeChapter({
+    ...chapter,
+    linkedEntities,
+  });
+
+  return {
+    ok: true,
+    provider: provider.name,
+    model: provider.model,
+    summary: result.summary,
+    notes: result.notes || [],
+  };
 }
 
 async function buildWorkspaceSnapshot() {
@@ -160,25 +239,6 @@ async function buildWorkspaceSnapshot() {
       if (a.order !== null && b.order !== null) return a.order - b.order;
       return a.path.localeCompare(b.path);
     });
-
-  const toEntityRecord = (entry, kind) => {
-    const meta = entry.frontmatter;
-    return {
-      id: meta.id || entry.path,
-      type: meta.type || kind,
-      name: meta.name || meta.label || entry.fileName,
-      label: meta.label || null,
-      status: meta.status || 'unknown',
-      canon: meta.canon || null,
-      first_appearance: meta.first_appearance || null,
-      source_manuscript: meta.source_manuscript || null,
-      path: entry.path,
-      summary: summarizeBody(entry.body),
-      body: entry.body,
-    };
-  };
-
-  const mapById = (records) => Object.fromEntries(records.map((record) => [record.id, record]));
 
   return {
     mode: 'local-repository',
@@ -223,6 +283,20 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({ ok: true, ...result }));
     } catch (error) {
       const status = /Path|Body|JSON/.test(error.message) ? 400 : 500;
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: error.message }));
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/ai/summarize-chapter') {
+    try {
+      const payload = await readJsonBody(req);
+      const result = await summarizeChapter(payload.path);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (error) {
+      const status = /Path|JSON|Unsupported AI provider/.test(error.message) ? 400 : 500;
       res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false, error: error.message }));
     }
