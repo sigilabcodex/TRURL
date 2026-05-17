@@ -53,6 +53,13 @@ function countLinkedEntities(packagePayload) {
   };
 }
 
+const validationActions = [
+  { label: 'All Checks', endpoint: '/api/validate/all', primary: true },
+  { label: 'Frontmatter', endpoint: '/api/validate/frontmatter' },
+  { label: 'Crossrefs', endpoint: '/api/validate/crossrefs' },
+  { label: 'Manuscript Order', endpoint: '/api/validate/manuscript-order' },
+];
+
 function App() {
   const [workspace, setWorkspace] = useState(null);
   const [activeSection, setActiveSection] = useState('Manuscript');
@@ -66,6 +73,9 @@ function App() {
   const [packageState, setPackageState] = useState('idle');
   const [packageError, setPackageError] = useState(null);
   const [documentPackage, setDocumentPackage] = useState(null);
+  const [validationState, setValidationState] = useState('idle');
+  const [validationError, setValidationError] = useState(null);
+  const [validationResult, setValidationResult] = useState(null);
 
   async function loadWorkspace(preferredChapterId = null) {
     try {
@@ -175,6 +185,25 @@ function App() {
     } catch (buildError) {
       setPackageState('idle');
       setPackageError(buildError.message);
+    }
+  }
+
+  async function handleRunValidation(endpoint) {
+    setValidationState('loading');
+    setValidationError(null);
+
+    try {
+      const response = await fetch(endpoint, { method: 'POST' });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || `Validation request failed (${response.status})`);
+      }
+
+      setValidationResult(payload);
+      setValidationState('ready');
+    } catch (validationRequestError) {
+      setValidationState('idle');
+      setValidationError(validationRequestError.message);
     }
   }
 
@@ -417,6 +446,61 @@ function App() {
               <p className="package-empty">
                 {selectedChapter ? `Ready for ${selectedChapter.path}` : 'Select a chapter first.'}
               </p>
+            )}
+          </section>
+          <section className="validation-panel">
+            <div className="render-package-header">
+              <div>
+                <h3>Validation</h3>
+                <p>Read-only repository health checks.</p>
+              </div>
+              {validationResult && (
+                <span className={`status-badge ${validationResult.ok ? 'ok' : 'fail'}`}>
+                  {validationResult.ok ? 'ok' : 'fail'}
+                </span>
+              )}
+            </div>
+
+            <div className="validation-controls">
+              {validationActions.map((action) => (
+                <button
+                  key={action.endpoint}
+                  type="button"
+                  className={action.primary ? 'primary' : ''}
+                  onClick={() => handleRunValidation(action.endpoint)}
+                  disabled={validationState === 'loading'}
+                >
+                  {validationState === 'loading' ? 'Running...' : action.label}
+                </button>
+              ))}
+            </div>
+
+            {validationError && <p className="error">Validation failed: {validationError}</p>}
+
+            {validationResult ? (
+              <div className="validation-results">
+                <p className={`validation-overall ${validationResult.ok ? 'ok' : 'fail'}`}>
+                  Overall: {validationResult.ok ? 'passed' : 'failed'}
+                </p>
+                <ul>
+                  {validationResult.checks.map((check) => (
+                    <li key={check.name}>
+                      <div className="validation-check-header">
+                        <strong>{check.name}</strong>
+                        <code>exit {check.exitCode}</code>
+                      </div>
+                      {check.stdout && (
+                        <pre>{check.stdout}</pre>
+                      )}
+                      {check.stderr && (
+                        <pre className="stderr">{check.stderr}</pre>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="package-empty">Run checks manually before edits or exports.</p>
             )}
           </section>
         </aside>
