@@ -40,6 +40,19 @@ function resolveLinkedEntities(selectedChapter, entities) {
   };
 }
 
+function countLinkedEntities(packagePayload) {
+  const linkedEntities = packagePayload?.package?.storyBible?.linkedEntities;
+  if (!linkedEntities) {
+    return { characters: 0, locations: 0, timeline: 0 };
+  }
+
+  return {
+    characters: linkedEntities.characters?.length || 0,
+    locations: linkedEntities.locations?.length || 0,
+    timeline: linkedEntities.timeline?.length || 0,
+  };
+}
+
 function App() {
   const [workspace, setWorkspace] = useState(null);
   const [activeSection, setActiveSection] = useState('Manuscript');
@@ -48,6 +61,11 @@ function App() {
   const [editorBody, setEditorBody] = useState('');
   const [saveState, setSaveState] = useState('idle');
   const [error, setError] = useState(null);
+  const [stylePreset, setStylePreset] = useState('editorial-default');
+  const [outputTarget, setOutputTarget] = useState('html');
+  const [packageState, setPackageState] = useState('idle');
+  const [packageError, setPackageError] = useState(null);
+  const [documentPackage, setDocumentPackage] = useState(null);
 
   async function loadWorkspace(preferredChapterId = null) {
     try {
@@ -91,10 +109,14 @@ function App() {
       setEditorBody(selectedChapter.body);
       setSaveState('idle');
       setIsEditing(false);
+      setDocumentPackage(null);
+      setPackageState('idle');
+      setPackageError(null);
     }
   }, [selectedChapterId, selectedChapter?.body, selectedChapter]);
 
   const isDirty = selectedChapter ? editorBody !== selectedChapter.body : false;
+  const packageEntityCounts = countLinkedEntities(documentPackage);
 
   async function handleSave() {
     if (!selectedChapter || !isEditing) return;
@@ -123,6 +145,36 @@ function App() {
     } catch (saveError) {
       setSaveState('idle');
       setError(saveError.message);
+    }
+  }
+
+  async function handleBuildPackage() {
+    if (!selectedChapter) return;
+
+    setPackageState('loading');
+    setPackageError(null);
+
+    try {
+      const response = await fetch('/api/render/document-package', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: selectedChapter.path,
+          stylePreset,
+          outputTarget,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || `Package request failed (${response.status})`);
+      }
+
+      setDocumentPackage(payload);
+      setPackageState('ready');
+    } catch (buildError) {
+      setPackageState('idle');
+      setPackageError(buildError.message);
     }
   }
 
@@ -284,6 +336,88 @@ function App() {
                 </li>
               ))}
             </ul>
+          </section>
+          <section className="render-package">
+            <div className="render-package-header">
+              <div>
+                <h3>Render Package</h3>
+                <p>Mock TRURL package preview. No OSER render.</p>
+              </div>
+              <span className="mock-badge">mock</span>
+            </div>
+
+            <div className="package-controls">
+              <label>
+                <span>Style preset</span>
+                <input
+                  type="text"
+                  value={stylePreset}
+                  onChange={(event) => setStylePreset(event.target.value)}
+                  placeholder="editorial-default"
+                />
+              </label>
+              <label>
+                <span>Output target</span>
+                <select
+                  value={outputTarget}
+                  onChange={(event) => setOutputTarget(event.target.value)}
+                >
+                  <option value="html">html</option>
+                  <option value="pdf">pdf</option>
+                  <option value="epub">epub</option>
+                  <option value="web">web</option>
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={handleBuildPackage}
+                disabled={!selectedChapter || packageState === 'loading'}
+              >
+                {packageState === 'loading' ? 'Building...' : 'Build Package'}
+              </button>
+            </div>
+
+            {packageError && <p className="error">Package failed: {packageError}</p>}
+
+            {documentPackage ? (
+              <div className="package-summary">
+                <dl>
+                  <dt>Schema</dt>
+                  <dd>{documentPackage.package.schema}</dd>
+                  <dt>Mode</dt>
+                  <dd>{documentPackage.mode}</dd>
+                  <dt>Target</dt>
+                  <dd>{documentPackage.package.output.target}</dd>
+                  <dt>Output path</dt>
+                  <dd><code>{documentPackage.package.output.path}</code></dd>
+                  <dt>Selected</dt>
+                  <dd>{documentPackage.package.manuscript.selected.title}</dd>
+                  <dt>Source path</dt>
+                  <dd><code>{documentPackage.package.manuscript.selected.path}</code></dd>
+                  <dt>Entities</dt>
+                  <dd>
+                    {packageEntityCounts.characters} characters, {' '}
+                    {packageEntityCounts.locations} locations, {' '}
+                    {packageEntityCounts.timeline} timeline
+                  </dd>
+                  <dt>Style preset</dt>
+                  <dd>{documentPackage.package.style.preset}</dd>
+                  <dt>Warnings</dt>
+                  <dd>{documentPackage.warnings.length ? documentPackage.warnings.join(', ') : 'none'}</dd>
+                </dl>
+
+                <details>
+                  <summary>JSON preview</summary>
+                  <pre className="package-json">
+                    {JSON.stringify(documentPackage.package, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            ) : (
+              <p className="package-empty">
+                {selectedChapter ? `Ready for ${selectedChapter.path}` : 'Select a chapter first.'}
+              </p>
+            )}
           </section>
         </aside>
       </main>

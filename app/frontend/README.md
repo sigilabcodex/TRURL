@@ -22,6 +22,7 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
    - real chapter list
    - selected chapter body
    - context panel resolved from `character_ids`, `location_ids`, `timeline_ids`
+   - read-only mock render package preview for the selected chapter
 
 ## What is Real in This Pass
 
@@ -34,12 +35,16 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 - real context resolution against story-bible IDs
 - repository section counts for manuscript/story bible/notes/revision
 - workspace state indicator with selected chapter path
+- manual `POST /api/render/document-package` request for the selected chapter
+- compact render package summary and scrollable JSON preview
 
 ## What is Still Mocked / Deferred
 
 - no git branch/status operations (no fake branch indicator shown)
 - no validation action wiring from UI
 - no AI calls
+- no OSER import, dependency, or real rendering
+- no HTML/PDF/EPUB generation from the frontend
 - no cloud sync/auth/multi-user features
 - no frontmatter editing in UI (body-only editing in this pass)
 - no rich text editing/toolbar/undo system
