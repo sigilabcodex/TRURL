@@ -1,6 +1,6 @@
 # TRURL Local Backend
 
-Tiny local bridge for repository-backed reads, safe manuscript body writes, and read-only AI assistance.
+Tiny local bridge for repository-backed reads, safe manuscript body writes, read-only AI assistance, and mock render package assembly.
 
 ## Purpose
 
@@ -11,6 +11,7 @@ Expose repository-backed workspace data for the frontend and a minimal save API 
 - `GET /api/workspace` — returns manuscript index, selected metadata fields, story-bible entity maps, and section counts.
 - `POST /api/save-manuscript` — saves manuscript body text back to a file in `manuscript/`.
 - `POST /api/ai/summarize-chapter` — loads one manuscript file and returns a read-only AI summary.
+- `POST /api/render/document-package` — builds a read-only mock TRURL document package for future OSER integration.
 
 ### `POST /api/save-manuscript`
 
@@ -60,6 +61,67 @@ Safety rules in this pass:
 - no manuscript, story-bible, Git, or frontend state is modified
 
 The AI request context includes the chapter title, parsed frontmatter, body, and linked character/location/timeline records from story-bible frontmatter IDs when available.
+
+### `POST /api/render/document-package`
+
+Request JSON:
+
+```json
+{
+  "path": "manuscript/01-opening-confession.md",
+  "stylePreset": "editorial-default",
+  "outputTarget": "html"
+}
+```
+
+Response JSON:
+
+```json
+{
+  "ok": true,
+  "mode": "mock-document-package",
+  "package": {
+    "schema": "trurl-document-package/v0",
+    "status": {
+      "provider": "trurl",
+      "mode": "mock-document-package",
+      "rendered": false
+    },
+    "project": {},
+    "manuscript": {},
+    "storyBible": {},
+    "assets": [],
+    "style": {},
+    "output": {}
+  },
+  "warnings": []
+}
+```
+
+This endpoint is the first backend shape for the future TRURL → OSER bridge object. It packages TRURL source data and render intent, but it does not import OSER, call OSER, render HTML, write export files, or modify manuscript/story-bible/Git/frontend state.
+
+Safety rules in this pass:
+
+- path uses the same manuscript path validation as `POST /api/save-manuscript`
+- target must be a `.md` file under `manuscript/`
+- linked story-bible entities are resolved from `character_ids`, `location_ids`, and `timeline_ids`
+- generated package data is returned in the HTTP response only
+
+Example request:
+
+```bash
+curl -s http://localhost:4177/api/render/document-package \
+  -H 'Content-Type: application/json' \
+  -d '{"path":"manuscript/01-opening-confession.md","stylePreset":"editorial-default","outputTarget":"html"}'
+```
+
+Path safety check:
+
+```bash
+curl -i http://localhost:4177/api/render/document-package \
+  -H 'Content-Type: application/json' \
+  -d '{"path":"../README.md","stylePreset":"editorial-default","outputTarget":"html"}'
+```
 
 ## AI Provider Configuration
 
