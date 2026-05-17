@@ -1,6 +1,6 @@
 # TRURL Local Backend
 
-Tiny local bridge for repository-backed reads, safe manuscript body writes, read-only AI assistance, and mock render package assembly.
+Tiny local bridge for repository-backed reads, safe manuscript body writes, read-only AI assistance, mock render package assembly, and validation checks.
 
 ## Purpose
 
@@ -12,6 +12,10 @@ Expose repository-backed workspace data for the frontend and a minimal save API 
 - `POST /api/save-manuscript` — saves manuscript body text back to a file in `manuscript/`.
 - `POST /api/ai/summarize-chapter` — loads one manuscript file and returns a read-only AI summary.
 - `POST /api/render/document-package` — builds a read-only mock TRURL document package for future OSER integration.
+- `POST /api/validate/frontmatter` — runs frontmatter validation.
+- `POST /api/validate/crossrefs` — runs manuscript/story-bible cross-reference validation.
+- `POST /api/validate/manuscript-order` — runs manuscript filename/order validation.
+- `POST /api/validate/all` — runs all validation checks in stable order.
 
 ### `POST /api/save-manuscript`
 
@@ -121,6 +125,49 @@ Path safety check:
 curl -i http://localhost:4177/api/render/document-package \
   -H 'Content-Type: application/json' \
   -d '{"path":"../README.md","stylePreset":"editorial-default","outputTarget":"html"}'
+```
+
+### Validation Endpoints
+
+Validation endpoints expose the existing repository scripts through a fixed backend allowlist. They do not accept arbitrary commands and do not write manuscript, story-bible, Git, or export state.
+
+Available checks:
+
+- `frontmatter` → `python3 scripts/validate_frontmatter.py`
+- `crossrefs` → `python3 scripts/check_crossrefs.py`
+- `manuscript-order` → `python3 scripts/check_manuscript_order.py`
+
+Response JSON:
+
+```json
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "frontmatter",
+      "command": "python3 scripts/validate_frontmatter.py",
+      "exitCode": 0,
+      "stdout": "Frontmatter validation passed.\n",
+      "stderr": ""
+    }
+  ]
+}
+```
+
+If a check exits nonzero, the HTTP request still returns structured JSON with `ok: false`, `exitCode`, `stdout`, and `stderr`.
+
+Run one check:
+
+```bash
+curl -s -X POST http://localhost:4177/api/validate/frontmatter
+curl -s -X POST http://localhost:4177/api/validate/crossrefs
+curl -s -X POST http://localhost:4177/api/validate/manuscript-order
+```
+
+Run all checks:
+
+```bash
+curl -s -X POST http://localhost:4177/api/validate/all
 ```
 
 ## AI Provider Configuration

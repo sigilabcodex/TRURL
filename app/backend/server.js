@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
+import { execFile } from 'node:child_process';
 import http from 'node:http';
 import path from 'node:path';
+import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { createAiProvider } from './ai/index.js';
 
@@ -8,6 +10,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
 const port = Number(process.env.PORT || 4177);
+const execFileAsync = promisify(execFile);
+
+const validationChecks = {
+  frontmatter: {
+    name: 'frontmatter',
+    script: 'scripts/validate_frontmatter.py',
+  },
+  crossrefs: {
+    name: 'crossrefs',
+    script: 'scripts/check_crossrefs.py',
+  },
+  manuscriptOrder: {
+    name: 'manuscript-order',
+    script: 'scripts/check_manuscript_order.py',
+  },
+};
+
+const validationOrder = [
+  validationChecks.frontmatter,
+  validationChecks.crossrefs,
+  validationChecks.manuscriptOrder,
+];
 
 function coerceValue(value) {
   if (value === 'true') return true;
@@ -311,6 +335,46 @@ async function buildDocumentPackage({ path: manuscriptPath, stylePreset, outputT
   };
 }
 
+async function runValidationCheck(check) {
+  const command = `python3 ${check.script}`;
+
+  try {
+    const result = await execFileAsync('python3', [check.script], {
+      cwd: repoRoot,
+      maxBuffer: 1024 * 1024,
+    });
+
+    return {
+      name: check.name,
+      command,
+      exitCode: 0,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    };
+  } catch (error) {
+    return {
+      name: check.name,
+      command,
+      exitCode: Number.isInteger(error.code) ? error.code : 1,
+      stdout: error.stdout || '',
+      stderr: error.stderr || error.message,
+    };
+  }
+}
+
+async function runValidationChecks(checks) {
+  const results = [];
+
+  for (const check of checks) {
+    results.push(await runValidationCheck(check));
+  }
+
+  return {
+    ok: results.every((result) => result.exitCode === 0),
+    checks: results,
+  };
+}
+
 async function buildWorkspaceSnapshot() {
   const [manuscriptRaw, characterRaw, locationRaw, timelineRaw, notesRaw, revisionRaw] = await Promise.all([
     readMarkdownDirectory('manuscript'),
@@ -415,6 +479,34 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false, error: error.message }));
     }
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/validate/frontmatter') {
+    const result = await runValidationChecks([validationChecks.frontmatter]);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result));
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/validate/crossrefs') {
+    const result = await runValidationChecks([validationChecks.crossrefs]);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result));
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/validate/manuscript-order') {
+    const result = await runValidationChecks([validationChecks.manuscriptOrder]);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result));
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/validate/all') {
+    const result = await runValidationChecks(validationOrder);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result));
     return;
   }
 
