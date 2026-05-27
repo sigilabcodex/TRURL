@@ -1,6 +1,6 @@
 # TRURL Local Backend
 
-Tiny local bridge for repository-backed reads, safe manuscript body writes, read-only AI assistance, mock render package assembly, and validation checks.
+Tiny local bridge for repository-backed reads, safe manuscript body writes, read-only AI assistance, mock render package assembly, validation checks, and Git visibility.
 
 ## Purpose
 
@@ -16,6 +16,8 @@ Expose repository-backed workspace data for the frontend and a minimal save API 
 - `POST /api/validate/crossrefs` — runs manuscript/story-bible cross-reference validation.
 - `POST /api/validate/manuscript-order` — runs manuscript filename/order validation.
 - `POST /api/validate/all` — runs all validation checks in stable order.
+- `GET /api/git/status` — returns read-only branch/status output.
+- `GET /api/git/diff` — returns read-only diff stat and scoped diff output.
 
 ### `POST /api/save-manuscript`
 
@@ -168,6 +170,41 @@ Run all checks:
 
 ```bash
 curl -s -X POST http://localhost:4177/api/validate/all
+```
+
+### Git Visibility Endpoints
+
+Git endpoints expose fixed read-only commands only. They do not accept command input and do not create branches, commit, revert, merge, push, or modify files.
+
+Commands:
+
+- `GET /api/git/status` → `git status --short --branch`
+- `GET /api/git/diff` → `git diff --stat` and `git diff -- app/backend app/frontend README.md docs scripts ai schema manuscript story-bible notes revision`
+
+Response JSON:
+
+```json
+{
+  "ok": true,
+  "commands": [
+    {
+      "name": "status",
+      "command": "git status --short --branch",
+      "exitCode": 0,
+      "stdout": "## main\n",
+      "stderr": ""
+    }
+  ]
+}
+```
+
+If Git exits nonzero, the response uses `ok: false` and still includes `stdout`, `stderr`, and `exitCode`.
+
+Examples:
+
+```bash
+curl -s http://localhost:4177/api/git/status
+curl -s http://localhost:4177/api/git/diff
 ```
 
 ## AI Provider Configuration

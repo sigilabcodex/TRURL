@@ -476,6 +476,65 @@ h3 {
   color: #912018;
 }
 
+.git-panel {
+  padding-top: 0.8rem;
+  border-top: 1px solid #d0d5dd;
+}
+
+.git-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+}
+
+.git-controls button {
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  padding: 0.38rem 0.45rem;
+  background: #fff;
+  color: #101828;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.git-controls button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.git-output {
+  margin-top: 0.6rem;
+  padding: 0.5rem;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  background: #fcfcfd;
+}
+
+.git-output small {
+  display: block;
+  margin: 0.35rem 0 0.2rem;
+  color: #475467;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.git-output pre {
+  max-height: 170px;
+  margin: 0.35rem 0 0;
+  overflow: auto;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  padding: 0.45rem;
+  background: #f8fafc;
+  color: #101828;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
 .error {
   color: #b42318;
   font-weight: 500;

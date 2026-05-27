@@ -24,6 +24,7 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
    - context panel resolved from `character_ids`, `location_ids`, `timeline_ids`
    - read-only mock render package preview for the selected chapter
    - read-only validation controls for repository health checks
+   - read-only Git status and diff visibility
 
 ## What is Real in This Pass
 
@@ -40,10 +41,12 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 - compact render package summary and scrollable JSON preview
 - manual validation requests for frontmatter, crossrefs, manuscript order, or all checks
 - compact validation status/output display
+- manual `GET /api/git/status` and `GET /api/git/diff` requests
+- compact read-only Git output display
 
 ## What is Still Mocked / Deferred
 
-- no git branch/status operations (no fake branch indicator shown)
+- no git branch, commit, merge, revert, or push operations
 - no AI calls
 - no OSER import, dependency, or real rendering
 - no HTML/PDF/EPUB generation from the frontend

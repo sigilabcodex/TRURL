@@ -76,6 +76,10 @@ function App() {
   const [validationState, setValidationState] = useState('idle');
   const [validationError, setValidationError] = useState(null);
   const [validationResult, setValidationResult] = useState(null);
+  const [gitState, setGitState] = useState('idle');
+  const [gitError, setGitError] = useState(null);
+  const [gitStatus, setGitStatus] = useState(null);
+  const [gitDiff, setGitDiff] = useState(null);
 
   async function loadWorkspace(preferredChapterId = null) {
     try {
@@ -204,6 +208,25 @@ function App() {
     } catch (validationRequestError) {
       setValidationState('idle');
       setValidationError(validationRequestError.message);
+    }
+  }
+
+  async function handleGitRequest(endpoint, setter) {
+    setGitState('loading');
+    setGitError(null);
+
+    try {
+      const response = await fetch(endpoint);
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || `Git request failed (${response.status})`);
+      }
+
+      setter(payload);
+      setGitState('ready');
+    } catch (gitRequestError) {
+      setGitState('idle');
+      setGitError(gitRequestError.message);
     }
   }
 
@@ -501,6 +524,65 @@ function App() {
               </div>
             ) : (
               <p className="package-empty">Run checks manually before edits or exports.</p>
+            )}
+          </section>
+          <section className="git-panel">
+            <div className="render-package-header">
+              <div>
+                <h3>Git</h3>
+                <p>Read-only status and diff visibility.</p>
+              </div>
+              <span className="mock-badge">read</span>
+            </div>
+
+            <div className="git-controls">
+              <button
+                type="button"
+                onClick={() => handleGitRequest('/api/git/status', setGitStatus)}
+                disabled={gitState === 'loading'}
+              >
+                {gitState === 'loading' ? 'Loading...' : 'Refresh Status'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleGitRequest('/api/git/diff', setGitDiff)}
+                disabled={gitState === 'loading'}
+              >
+                {gitState === 'loading' ? 'Loading...' : 'Show Diff'}
+              </button>
+            </div>
+
+            {gitError && <p className="error">Git request failed: {gitError}</p>}
+
+            {gitStatus ? (
+              <div className="git-output">
+                <div className="validation-check-header">
+                  <strong>Status</strong>
+                  <code>{gitStatus.ok ? 'ok' : 'fail'}</code>
+                </div>
+                {gitStatus.commands.map((command) => (
+                  <pre key={command.name}>
+                    {command.stdout || command.stderr || '(no output)'}
+                  </pre>
+                ))}
+              </div>
+            ) : (
+              <p className="package-empty">Refresh status to inspect branch and working tree state.</p>
+            )}
+
+            {gitDiff && (
+              <div className="git-output">
+                <div className="validation-check-header">
+                  <strong>Diff</strong>
+                  <code>{gitDiff.ok ? 'ok' : 'fail'}</code>
+                </div>
+                {gitDiff.commands.map((command) => (
+                  <div key={command.name}>
+                    <small>{command.command}</small>
+                    <pre>{command.stdout || command.stderr || '(no output)'}</pre>
+                  </div>
+                ))}
+              </div>
             )}
           </section>
         </aside>
