@@ -119,13 +119,13 @@ function buildCombinedMarkdown(chapters) {
   return `${parts.filter(Boolean).join('\n\n---\n\n')}\n`;
 }
 
-function commandRecord(label, command, args, cwd) {
+function commandRecord(label, args, cwd) {
   return {
     label,
-    command,
+    command: 'npm',
     args,
     cwd,
-    shell: [command, ...args].join(' '),
+    shell: ['npm', ...args].join(' '),
   };
 }
 
@@ -205,9 +205,11 @@ async function main() {
     await writeFile(combinedMarkdownPath, buildCombinedMarkdown(chapters), 'utf8');
 
     const plannedCommands = [
-      commandRecord('validate', 'npm', ['run', 'validate', '--', combinedMarkdownPath], oserRoot),
-      commandRecord('render-html', 'npm', ['run', 'render:html', '--', combinedMarkdownPath, htmlOutputPath], oserRoot),
-      commandRecord('render-print-html', 'npm', [
+      commandRecord('validate', ['--prefix', oserRoot, 'run', 'validate', '--', combinedMarkdownPath], repoRoot),
+      commandRecord('render-html', ['--prefix', oserRoot, 'run', 'render:html', '--', combinedMarkdownPath, htmlOutputPath], repoRoot),
+      commandRecord('render-print-html', [
+        '--prefix',
+        oserRoot,
         'run',
         'render:html',
         '--',
@@ -215,8 +217,8 @@ async function main() {
         printHtmlOutputPath,
         '--style',
         'packages/html-renderer/styles/print.css',
-      ], oserRoot),
-      commandRecord('render-pdf', 'npm', ['run', 'render:pdf', '--', combinedMarkdownPath, pdfOutputPath], oserRoot),
+      ], repoRoot),
+      commandRecord('render-pdf', ['--prefix', oserRoot, 'run', 'render:pdf', '--', combinedMarkdownPath, pdfOutputPath], repoRoot),
     ];
 
     for (const plannedCommand of plannedCommands) {

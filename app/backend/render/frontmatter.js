@@ -79,7 +79,9 @@ export async function readManuscriptChapters(repoRoot) {
   }
 
   return chapters.sort((a, b) => {
-    if (a.order !== null && b.order !== null) return a.order - b.order;
+    if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order;
+    if (a.order !== null && b.order === null) return -1;
+    if (a.order === null && b.order !== null) return 1;
     return a.path.localeCompare(b.path);
   });
 }
