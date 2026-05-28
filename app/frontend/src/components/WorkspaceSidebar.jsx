@@ -1,0 +1,64 @@
+import React from 'react';
+
+const repositorySections = [
+  { key: 'Manuscript', countKey: 'manuscript' },
+  { key: 'Story Bible', countKey: 'storyBible' },
+  { key: 'Notes', countKey: 'notes' },
+  { key: 'Revision', countKey: 'revision' },
+  { key: 'AI', countKey: null },
+  { key: 'Validation', countKey: null },
+];
+
+function renderCount(sectionKey, sections) {
+  if (!sections) {
+    return '...';
+  }
+
+  if (sectionKey === 'storyBible') {
+    const total = sections.storyBible.characters + sections.storyBible.locations + sections.storyBible.timeline;
+    return total;
+  }
+
+  return sections[sectionKey] ?? '—';
+}
+
+export function WorkspaceSidebar({
+  activeSection,
+  isEditing,
+  selectedChapter,
+  sections,
+  onActiveSectionChange,
+}) {
+  return (
+    <aside className="panel sidebar">
+      <h2>Repository</h2>
+      <nav>
+        <ul>
+          {repositorySections.map((section) => {
+            const isActive = section.key === activeSection;
+            const count = section.countKey ? renderCount(section.countKey, sections) : 'next';
+            return (
+              <li key={section.key}>
+                <button
+                  type="button"
+                  className={isActive ? 'active' : ''}
+                  onClick={() => onActiveSectionChange(section.key)}
+                >
+                  <span>{section.key}</span>
+                  <small>{count}</small>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="workspace-state">
+        <h3>Workspace State</h3>
+        <p><strong>Section:</strong> {activeSection}</p>
+        <p><strong>Selected:</strong> {selectedChapter?.path || 'none'}</p>
+        <p><strong>Local:</strong> repository-backed {isEditing ? 'edit' : 'read'} mode</p>
+      </div>
+    </aside>
+  );
+}
