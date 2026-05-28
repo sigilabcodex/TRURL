@@ -549,3 +549,305 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Editor quality-of-life pass. Preview is an authoring aid, not the final OSER publishing render. */
+.editor-header {
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.editor-header p {
+  margin: 0.25rem 0 0;
+  color: #475467;
+  font-size: 0.82rem;
+}
+
+.focus-toggle,
+.editor-mode-toggle button,
+.chapter-controls button {
+  min-height: 32px;
+}
+
+.focus-toggle {
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  padding: 0.35rem 0.65rem;
+  background: #fff;
+  color: #101828;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.focus-toggle.active {
+  border-color: #84caff;
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.workspace-grid.focus-mode {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace-grid.focus-mode .sidebar,
+.workspace-grid.focus-mode .metadata {
+  display: none;
+}
+
+.workspace-grid.focus-mode .editor {
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.chapter-content {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.chapter-content-header {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.chapter-content-header h3 {
+  font-size: 1.05rem;
+}
+
+.selected-path {
+  margin: 0.2rem 0 0;
+  color: #475467;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.chapter-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.save-status {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 136px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 0.32rem 0.48rem;
+  background: #f8fafc;
+  color: #344054;
+  font-size: 0.72rem;
+}
+
+.save-status strong {
+  color: #101828;
+  font-size: 0.76rem;
+}
+
+.save-status span {
+  color: #475467;
+}
+
+.save-status.dirty {
+  border-color: #fedf89;
+  background: #fffaeb;
+}
+
+.save-status.dirty strong {
+  color: #b54708;
+}
+
+.save-status.saving {
+  border-color: #84caff;
+  background: #eff8ff;
+}
+
+.save-status.saved {
+  border-color: #abefc6;
+  background: #ecfdf3;
+}
+
+.editor-toolbar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(86px, max-content)) minmax(180px, 1fr) auto;
+  gap: 0.45rem;
+  align-items: stretch;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  padding: 0.45rem;
+  background: #fcfcfd;
+}
+
+.editor-stat,
+.editor-path {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+  border-right: 1px solid #eaecf0;
+  padding-right: 0.55rem;
+}
+
+.editor-stat span,
+.editor-path span {
+  color: #667085;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.editor-stat strong,
+.editor-path strong {
+  min-width: 0;
+  color: #101828;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.editor-path strong {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.editor-mode-toggle {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem;
+  align-self: center;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 0.18rem;
+  background: #fff;
+}
+
+.editor-mode-toggle button {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.editor-mode-toggle button.active {
+  background: #101828;
+  color: #fff;
+}
+
+.chapter-editor,
+.chapter-read-body,
+.authoring-preview {
+  width: min(100%, 820px);
+  margin: 0 auto;
+}
+
+.chapter-editor {
+  min-height: 560px;
+  border-color: #b8c2d2;
+  padding: 1.15rem 1.25rem;
+  background: #fff;
+  color: #101828;
+  font-family: ui-monospace, SFMono-Regular, Consolas, Liberation Mono, monospace;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.chapter-editor:focus {
+  outline: 3px solid #d1e9ff;
+  outline-offset: 2px;
+  border-color: #53b1fd;
+}
+
+.chapter-read-body {
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  padding: 1.15rem 1.25rem;
+  background: #fcfcfd;
+  color: #101828;
+  font-family: ui-monospace, SFMono-Regular, Consolas, Liberation Mono, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.authoring-preview {
+  min-height: 420px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 1.4rem 1.55rem;
+  background: #fff;
+  color: #101828;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.authoring-preview h1,
+.authoring-preview h2,
+.authoring-preview h3,
+.authoring-preview h4 {
+  margin: 1.1rem 0 0.55rem;
+  line-height: 1.2;
+}
+
+.authoring-preview h1:first-child,
+.authoring-preview h2:first-child,
+.authoring-preview h3:first-child,
+.authoring-preview h4:first-child,
+.authoring-preview p:first-child {
+  margin-top: 0;
+}
+
+.authoring-preview p {
+  margin: 0 0 0.9rem;
+}
+
+.authoring-preview blockquote {
+  margin: 1rem 0;
+  border-left: 3px solid #98a2b3;
+  padding: 0.1rem 0 0.1rem 0.9rem;
+  color: #344054;
+}
+
+.authoring-preview ul {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.authoring-preview hr {
+  width: 44%;
+  margin: 1.4rem auto;
+  border: 0;
+  border-top: 1px solid #98a2b3;
+}
+
+.preview-empty {
+  color: #667085;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .editor-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .editor-path,
+  .editor-mode-toggle {
+    grid-column: 1 / -1;
+  }
+
+  .editor-stat,
+  .editor-path {
+    border-right: 0;
+    border-bottom: 1px solid #eaecf0;
+    padding: 0 0 0.4rem;
+  }
+
+  .chapter-editor,
+  .chapter-read-body,
+  .authoring-preview {
+    width: 100%;
+  }
+}

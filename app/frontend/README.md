@@ -21,6 +21,7 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 4. Frontend renders:
    - real chapter list
    - selected chapter body
+   - body-only authoring stats, edit/preview mode, and focus mode
    - context panel resolved from `character_ids`, `location_ids`, `timeline_ids`
    - read-only mock render package preview for the selected chapter
    - read-only validation controls for repository health checks
@@ -32,8 +33,11 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 - real frontmatter parsing (`id`, `title`, `type`, `order`, `status`, links, sources)
 - real chapter content display from Markdown body
 - read mode + explicit edit mode toggle for selected chapter body
+- body-only editor toolbar with selected path, word count, character count, and estimated reading time
+- safe authoring preview for simple Markdown structures; this is not the final OSER publishing render
+- Focus Mode that hides side/context panels with CSS while keeping the same workspace state
 - save action for manuscript body text through backend write endpoint
-- dirty/unsaved state indicator while editing
+- clearer saved/saving/unsaved state indicator while editing
 - real context resolution against story-bible IDs
 - repository section counts for manuscript/story bible/notes/revision
 - workspace state indicator with selected chapter path
@@ -52,7 +56,8 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 - no HTML/PDF/EPUB generation from the frontend
 - no cloud sync/auth/multi-user features
 - no frontmatter editing in UI (body-only editing in this pass)
-- no rich text editing/toolbar/undo system
+- no rich text editor dependency, WYSIWYG editing, or custom undo system
+- no final publishing preview in the editor; OSER output remains separate from this authoring preview
 
 ## Run Locally
 
