@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "render:html": "node render/render-manuscript-html.js"
+    "render:html": "node render/render-manuscript-html.js",
+    "export:oser": "node render/export-oser.js"
   },
   "dependencies": {
     "markdown-it": "^14.1.1"

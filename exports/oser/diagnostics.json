@@ -1,0 +1,133 @@
+{
+  "ok": true,
+  "mode": "experimental-oser-export",
+  "timestamp": "2026-05-28T00:58:32.424Z",
+  "startedAt": "2026-05-28T00:58:27.416Z",
+  "finishedAt": "2026-05-28T00:58:32.424Z",
+  "repoRoot": "/media/diegom/luna/DEV/TRURL",
+  "oserRoot": "/media/diegom/luna/DEV/oser",
+  "inputs": {
+    "chapters": [
+      {
+        "id": "ms.opening-confession",
+        "title": "Opening Confession",
+        "order": 1,
+        "path": "manuscript/01-opening-confession.md"
+      },
+      {
+        "id": "ms.the-murder",
+        "title": "The Murder",
+        "order": 2,
+        "path": "manuscript/02-the-murder.md"
+      },
+      {
+        "id": "ms.police-arrival",
+        "title": "Police Arrival",
+        "order": 3,
+        "path": "manuscript/03-police-arrival.md"
+      },
+      {
+        "id": "ms.test-live",
+        "title": "Live Test",
+        "order": 4,
+        "path": "manuscript/04-test-live.md"
+      }
+    ],
+    "combinedMarkdownPath": "exports/oser/.tmp/manuscript.md"
+  },
+  "outputs": {
+    "html": "exports/oser/manuscript.html",
+    "printHtml": "exports/oser/manuscript-print.html",
+    "pdf": "exports/oser/manuscript.pdf",
+    "diagnostics": "exports/oser/diagnostics.json"
+  },
+  "commands": [
+    {
+      "label": "validate",
+      "command": "npm",
+      "args": [
+        "run",
+        "validate",
+        "--",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md"
+      ],
+      "cwd": "/media/diegom/luna/DEV/oser",
+      "shell": "npm run validate -- /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md",
+      "startedAt": "2026-05-28T00:58:27.424Z",
+      "finishedAt": "2026-05-28T00:58:28.502Z",
+      "exitCode": 0,
+      "ok": true,
+      "required": false,
+      "stdout": "\n> oser@0.0.0 validate\n> npm run build --silent && node dist/packages/diagnostics/src/cli/validate.js /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md\n\nNo diagnostics found in /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md.\nSummary: 0 errors, 0 warnings, 0 info.\n",
+      "stderr": ""
+    },
+    {
+      "label": "render-html",
+      "command": "npm",
+      "args": [
+        "run",
+        "render:html",
+        "--",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/manuscript.html"
+      ],
+      "cwd": "/media/diegom/luna/DEV/oser",
+      "shell": "npm run render:html -- /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md /media/diegom/luna/DEV/TRURL/exports/oser/manuscript.html",
+      "startedAt": "2026-05-28T00:58:28.502Z",
+      "finishedAt": "2026-05-28T00:58:29.441Z",
+      "exitCode": 0,
+      "ok": true,
+      "required": true,
+      "stdout": "\n> oser@0.0.0 render:html\n> npm run build --silent && node dist/packages/html-renderer/src/cli/renderHtml.js /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md /media/diegom/luna/DEV/TRURL/exports/oser/manuscript.html\n\n/media/diegom/luna/DEV/TRURL/exports/oser/manuscript.html\n",
+      "stderr": ""
+    },
+    {
+      "label": "render-print-html",
+      "command": "npm",
+      "args": [
+        "run",
+        "render:html",
+        "--",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/manuscript-print.html",
+        "--style",
+        "packages/html-renderer/styles/print.css"
+      ],
+      "cwd": "/media/diegom/luna/DEV/oser",
+      "shell": "npm run render:html -- /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md /media/diegom/luna/DEV/TRURL/exports/oser/manuscript-print.html --style packages/html-renderer/styles/print.css",
+      "startedAt": "2026-05-28T00:58:29.441Z",
+      "finishedAt": "2026-05-28T00:58:30.389Z",
+      "exitCode": 0,
+      "ok": true,
+      "required": true,
+      "stdout": "\n> oser@0.0.0 render:html\n> npm run build --silent && node dist/packages/html-renderer/src/cli/renderHtml.js /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md /media/diegom/luna/DEV/TRURL/exports/oser/manuscript-print.html --style packages/html-renderer/styles/print.css\n\n/media/diegom/luna/DEV/TRURL/exports/oser/manuscript-print.html\n",
+      "stderr": ""
+    },
+    {
+      "label": "render-pdf",
+      "command": "npm",
+      "args": [
+        "run",
+        "render:pdf",
+        "--",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md",
+        "/media/diegom/luna/DEV/TRURL/exports/oser/manuscript.pdf"
+      ],
+      "cwd": "/media/diegom/luna/DEV/oser",
+      "shell": "npm run render:pdf -- /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md /media/diegom/luna/DEV/TRURL/exports/oser/manuscript.pdf",
+      "startedAt": "2026-05-28T00:58:30.389Z",
+      "finishedAt": "2026-05-28T00:58:32.424Z",
+      "exitCode": 0,
+      "ok": true,
+      "required": true,
+      "stdout": "\n> oser@0.0.0 render:pdf\n> npm run build --silent && node dist/packages/pdf-renderer/src/cli/renderPdf.js /media/diegom/luna/DEV/TRURL/exports/oser/.tmp/manuscript.md /media/diegom/luna/DEV/TRURL/exports/oser/manuscript.pdf\n\n/media/diegom/luna/DEV/TRURL/exports/oser/manuscript.pdf\n",
+      "stderr": ""
+    }
+  ],
+  "warnings": [
+    {
+      "code": "asset-copy-not-implemented",
+      "message": "This experimental export does not copy or rewrite assets yet."
+    }
+  ]
+}
