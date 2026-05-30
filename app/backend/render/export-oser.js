@@ -481,7 +481,7 @@ async function writeDiagnostics(payload) {
   await writeFile(diagnosticsPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 }
 
-async function main() {
+export async function runOserExport() {
   const warnings = [];
   const commands = [];
   const startedAt = nowIso();
@@ -557,18 +557,10 @@ async function main() {
 
     await writeDiagnostics(diagnostics);
 
-    if (errors.length > 0) {
-      const labels = errors.map((error) => error.commandLabel).join(', ');
-      throw new Error(`OSER export failed during required command(s): ${labels}. See ${relativeToRepo(diagnosticsPath)}.`);
-    }
-
-    console.log(`OSER export wrote ${relativeToRepo(htmlOutputPath)}`);
-    console.log(`OSER export wrote ${relativeToRepo(printHtmlOutputPath)}`);
-    console.log(`OSER export wrote ${relativeToRepo(pdfOutputPath)}`);
-    console.log(`OSER export wrote ${relativeToRepo(diagnosticsPath)}`);
+    return diagnostics;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    await writeDiagnostics(buildExportResult({
+    const diagnostics = buildExportResult({
       ok: false,
       startedAt,
       startedMs,
@@ -578,10 +570,28 @@ async function main() {
       warnings,
       errors: [{ code: 'oser-export-failed', message }],
       assets,
-    }));
+    });
+    await writeDiagnostics(diagnostics);
     console.error(message);
-    process.exitCode = 1;
+    return diagnostics;
   }
 }
 
-main();
+async function main() {
+  try {
+    const diagnostics = await runOserExport();
+    if (diagnostics && !diagnostics.ok) {
+      process.exitCode = 1;
+    }
+    return diagnostics;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(message);
+    process.exitCode = 1;
+    return error?.diagnostics ?? null;
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main();
+}
