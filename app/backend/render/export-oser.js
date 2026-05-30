@@ -1,4 +1,4 @@
-import { access, mkdir, stat, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -84,9 +84,12 @@ function collectChapterWarnings(chapters) {
   return warnings;
 }
 
-async function analyzeMarkdownAssets(chapters) {
+async function prepareMarkdownAssets(chapters) {
   const images = [];
   const warnings = [];
+  const usedOutputNames = new Map();
+
+  await mkdir(assetsOutputDir, { recursive: true });
 
   for (const chapter of chapters) {
     const chapterAbsolutePath = path.join(repoRoot, chapter.path);
@@ -96,96 +99,182 @@ async function analyzeMarkdownAssets(chapters) {
     for (const match of imageMatches) {
       const alt = match[1];
       const rawTarget = match[2].trim();
-      const src = extractMarkdownLinkDestination(rawTarget);
+      const parsedTarget = parseMarkdownLinkTarget(rawTarget);
+      const originalSrc = parsedTarget.src;
       const baseRecord = {
         chapterPath: chapter.path,
         alt,
-        src,
+        originalSrc,
         rawTarget,
       };
 
-      if (!src) {
+      if (!originalSrc) {
+        const warning = {
+          code: 'markdown-image-empty-src',
+          message: `${chapter.path} contains a Markdown image with an empty source.`,
+          path: chapter.path,
+        };
         images.push({
           ...baseRecord,
           kind: 'empty',
           exists: false,
+          copied: false,
+          warning,
         });
-        warnings.push({
-          code: 'markdown-image-empty-src',
-          message: `${chapter.path} contains a Markdown image with an empty source.`,
-          path: chapter.path,
-        });
+        warnings.push(warning);
         continue;
       }
 
-      if (isExternalAssetRef(src)) {
+      if (isExternalAssetRef(originalSrc)) {
         images.push({
           ...baseRecord,
           kind: 'external',
+          resolvedPath: null,
+          copiedTo: null,
+          rewrittenSrc: originalSrc,
           exists: null,
+          copied: false,
         });
         continue;
       }
 
-      if (src.startsWith('/') || src.startsWith('#')) {
+      if (originalSrc.startsWith('/') || originalSrc.startsWith('#')) {
         images.push({
           ...baseRecord,
-          kind: src.startsWith('#') ? 'anchor' : 'absolute',
+          kind: originalSrc.startsWith('#') ? 'anchor' : 'absolute',
+          resolvedPath: null,
+          copiedTo: null,
+          rewrittenSrc: originalSrc,
           exists: null,
+          copied: false,
         });
         continue;
       }
 
-      const resolvedPath = path.resolve(chapterDir, src);
+      const resolvedPath = path.resolve(chapterDir, originalSrc);
       const exists = await fileExists(resolvedPath);
+      const outputName = uniqueAssetOutputName(chapter.path, originalSrc, usedOutputNames);
+      const copiedToAbsolute = path.join(assetsOutputDir, outputName);
+      const copiedTo = relativeToRepo(copiedToAbsolute);
+      const rewrittenSrc = normalizePath(path.relative(tmpDir, copiedToAbsolute));
       const imageRecord = {
         ...baseRecord,
         kind: 'relative',
         resolvedPath: relativeToRepo(resolvedPath),
+        copiedTo,
+        rewrittenSrc,
         exists,
-        plannedOutputPath: path.posix.join('exports/oser/assets', path.basename(src)),
+        copied: false,
       };
-      images.push(imageRecord);
 
       if (!exists) {
-        warnings.push({
+        const warning = {
           code: 'markdown-image-missing',
-          message: `${chapter.path} references a missing relative image: ${src}`,
+          message: `${chapter.path} references a missing relative image: ${originalSrc}`,
           path: chapter.path,
-          src,
+          src: originalSrc,
           resolvedPath: imageRecord.resolvedPath,
-        });
+        };
+        imageRecord.warning = warning;
+        images.push(imageRecord);
+        warnings.push(warning);
+        continue;
       }
+
+      await copyFile(resolvedPath, copiedToAbsolute);
+      imageRecord.copied = true;
+      images.push(imageRecord);
     }
   }
 
-  if (images.some((image) => image.kind === 'relative')) {
-    warnings.push({
-      code: 'asset-copy-not-implemented',
-      message: 'Relative Markdown images were detected, but this experimental export does not copy assets or rewrite image paths yet.',
-      plannedAssetsDir: relativeToRepo(assetsOutputDir),
-    });
-  }
-
   return {
-    copyImplemented: false,
+    copyImplemented: true,
     plannedAssetsDir: relativeToRepo(assetsOutputDir),
     images,
     warnings,
   };
 }
 
-function extractMarkdownLinkDestination(rawTarget) {
-  if (!rawTarget) return '';
+function rewriteChapterMarkdownAssetRefs(body, chapterPath, assets) {
+  const chapterAssets = assets.images.filter((image) => image.chapterPath === chapterPath);
+  if (chapterAssets.length === 0) {
+    return body;
+  }
+
+  let imageIndex = 0;
+  return body.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (fullMatch, alt, rawTarget) => {
+    const image = chapterAssets[imageIndex];
+    imageIndex += 1;
+
+    if (!image || !image.rewrittenSrc || !image.copied) {
+      return fullMatch;
+    }
+
+    const parsedTarget = parseMarkdownLinkTarget(rawTarget.trim());
+    const rewrittenTarget = parsedTarget.title
+      ? `${image.rewrittenSrc} ${parsedTarget.title}`
+      : image.rewrittenSrc;
+
+    return `![${alt}](${rewrittenTarget})`;
+  });
+}
+
+function parseMarkdownLinkTarget(rawTarget) {
+  if (!rawTarget) {
+    return { src: '', title: '' };
+  }
 
   if (rawTarget.startsWith('<')) {
     const closingIndex = rawTarget.indexOf('>');
     if (closingIndex > 0) {
-      return rawTarget.slice(1, closingIndex).trim();
+      return {
+        src: rawTarget.slice(1, closingIndex).trim(),
+        title: rawTarget.slice(closingIndex + 1).trim(),
+      };
     }
   }
 
-  return rawTarget.split(/\s+/)[0].trim();
+  const match = rawTarget.match(/^(\S+)(?:\s+([\s\S]+))?$/);
+  return {
+    src: match?.[1]?.trim() ?? '',
+    title: match?.[2]?.trim() ?? '',
+  };
+}
+
+function uniqueAssetOutputName(chapterPath, originalSrc, usedOutputNames) {
+  const parsed = path.parse(originalSrc.split(/[?#]/)[0]);
+  const extension = parsed.ext || '';
+  const baseName = safeFileName(parsed.name || 'asset');
+  const chapterName = safeFileName(path.basename(chapterPath, path.extname(chapterPath)));
+  const initialName = `${chapterName}-${baseName}${extension}`;
+  const key = `${chapterPath}\n${originalSrc}`;
+
+  if (!usedOutputNames.has(initialName)) {
+    usedOutputNames.set(initialName, key);
+    return initialName;
+  }
+
+  if (usedOutputNames.get(initialName) === key) {
+    return initialName;
+  }
+
+  let counter = 2;
+  while (true) {
+    const candidate = `${chapterName}-${baseName}-${counter}${extension}`;
+    if (!usedOutputNames.has(candidate)) {
+      usedOutputNames.set(candidate, key);
+      return candidate;
+    }
+    counter += 1;
+  }
+}
+
+function safeFileName(value) {
+  return value.replace(/[^a-z0-9._-]+/gi, '-').replace(/^-+|-+$/g, '') || 'asset';
+}
+
+function normalizePath(value) {
+  return value.replace(/\\/g, '/');
 }
 
 function isExternalAssetRef(src) {
@@ -201,11 +290,11 @@ async function fileExists(filePath) {
   }
 }
 
-function buildCombinedMarkdown(chapters) {
+function buildCombinedMarkdown(chapters, assets = emptyAssetsReport()) {
   const parts = ['# Manuscript'];
 
   for (const chapter of chapters) {
-    const body = normalizeBody(chapter.body);
+    const body = normalizeBody(rewriteChapterMarkdownAssetRefs(chapter.body, chapter.path, assets));
     const heading = `# ${chapter.title}`;
     const chapterParts = [];
 
@@ -221,6 +310,14 @@ function buildCombinedMarkdown(chapters) {
   }
 
   return `${parts.filter(Boolean).join('\n\n---\n\n')}\n`;
+}
+
+async function rewriteGeneratedHtmlAssetRefs(filePath) {
+  const html = await readFile(filePath, 'utf8');
+  const rewritten = html.replace(/(src=["'])\.\.\/assets\//g, '$1assets/');
+  if (rewritten !== html) {
+    await writeFile(filePath, rewritten, 'utf8');
+  }
 }
 
 function commandRecord(label, args, cwd) {
@@ -361,7 +458,7 @@ function buildExportResult({
 
 function emptyAssetsReport() {
   return {
-    copyImplemented: false,
+    copyImplemented: true,
     plannedAssetsDir: relativeToRepo(assetsOutputDir),
     images: [],
     warnings: [],
@@ -402,13 +499,13 @@ async function main() {
       throw new Error('No manuscript chapters were found under manuscript/*.md.');
     }
 
-    assets = await analyzeMarkdownAssets(chapters);
+    assets = await prepareMarkdownAssets(chapters);
     warnings.push(...collectChapterWarnings(chapters));
     warnings.push(...assets.warnings);
 
     await mkdir(tmpDir, { recursive: true });
     await mkdir(outputDir, { recursive: true });
-    await writeFile(combinedMarkdownPath, buildCombinedMarkdown(chapters), 'utf8');
+    await writeFile(combinedMarkdownPath, buildCombinedMarkdown(chapters, assets), 'utf8');
 
     const plannedCommands = [
       commandRecord('validate', ['--prefix', oserRoot, 'run', 'validate', '--', combinedMarkdownPath], repoRoot),
@@ -436,6 +533,13 @@ async function main() {
       if (!result.ok && result.required) {
         break;
       }
+    }
+
+    if (commands.find((command) => command.label === 'render-html' && command.exitCode === 0)) {
+      await rewriteGeneratedHtmlAssetRefs(htmlOutputPath);
+    }
+    if (commands.find((command) => command.label === 'render-print-html' && command.exitCode === 0)) {
+      await rewriteGeneratedHtmlAssetRefs(printHtmlOutputPath);
     }
 
     const errors = requiredCommandErrors(commands);
