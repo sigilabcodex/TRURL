@@ -5,6 +5,9 @@ package-lock.json
 app/frontend/node_modules
 app/backend/node_modules
 
+# generated export artifacts
+exports/oser/
+
 # OS
 .DS_Store
 Thumbs.db
