@@ -1,0 +1,14 @@
+{
+  "name": "trurl",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-trurl.mjs",
+    "trurl": "npm run dev",
+    "dev:backend": "npm --prefix app/backend run dev",
+    "dev:frontend": "npm --prefix app/frontend run dev",
+    "build": "npm --prefix app/frontend run build",
+    "check": "node --check app/backend/server.js && node --check app/backend/lib/*.js && node --check app/backend/routes/*.js && npm run build"
+  }
+}

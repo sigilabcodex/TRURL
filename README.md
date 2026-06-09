@@ -32,6 +32,46 @@ Run from repository root:
 - `python3 scripts/check_crossrefs.py`
 - `python3 scripts/check_manuscript_order.py`
 
+## Run Locally
+
+Install the app dependencies from the repository root:
+
+```bash
+npm install --prefix app/backend
+npm install --prefix app/frontend
+```
+
+Start the backend and frontend together:
+
+```bash
+npm run trurl
+```
+
+This starts the local backend on `http://localhost:4177` and the Vite frontend on `http://localhost:5173` unless Vite selects the next available port. The frontend proxies `/api` requests to the backend.
+
+The same launcher is also available as:
+
+```bash
+npm run dev
+```
+
+Individual development commands are available when needed:
+
+```bash
+npm run dev:backend
+npm run dev:frontend
+npm run build
+npm run check
+```
+
+For command-style local usage without global packaging, add a temporary shell alias with your local repository path:
+
+```bash
+alias trurl='cd /path/to/TRURL && npm run trurl'
+```
+
+A real global `trurl` binary is intentionally deferred to a future packaging step.
+
 ## Folder Layout
 
 - `docs/` — project-level documentation, specifications, and architecture
