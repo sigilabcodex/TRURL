@@ -669,9 +669,9 @@ h3 {
   background: #ecfdf3;
 }
 
-.editor-toolbar {
+.editor-info-bar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(86px, max-content)) minmax(180px, 1fr) auto;
+  grid-template-columns: repeat(4, minmax(82px, max-content)) minmax(180px, 1fr) auto;
   gap: 0.45rem;
   align-items: stretch;
   border: 1px solid #eaecf0;
@@ -712,7 +712,7 @@ h3 {
 
 .editor-mode-toggle {
   display: inline-grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.2rem;
   align-self: center;
   border: 1px solid #d0d5dd;
@@ -829,7 +829,7 @@ h3 {
 }
 
 @media (max-width: 900px) {
-  .editor-toolbar {
+  .editor-info-bar {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -850,4 +850,41 @@ h3 {
   .authoring-preview {
     width: 100%;
   }
+}
+
+.format-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  width: min(100%, 820px);
+  margin: 0 auto;
+  padding: 0.45rem;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  background: #fcfcfd;
+}
+
+.format-toolbar button {
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  padding: 0.3rem 0.55rem;
+  background: #fff;
+  color: #101828;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.format-toolbar button:hover,
+.editor-mode-toggle button:hover,
+.chapter-controls button:hover,
+.focus-toggle:hover {
+  border-color: #98a2b3;
+  background: #f8fafc;
+}
+
+.editor-mode-toggle button.active:hover {
+  background: #101828;
+  color: #fff;
 }

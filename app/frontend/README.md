@@ -1,6 +1,6 @@
 # TRURL Frontend (Repository-Backed Pass)
 
-This pass upgrades the frontend from mocked data to a local repository viewer.
+This pass upgrades the frontend from mocked data to a local repository viewer and Markdown authoring surface.
 
 ## Local Architecture
 
@@ -21,19 +21,32 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 4. Frontend renders:
    - real chapter list
    - selected chapter body
-   - body-only authoring stats, edit/preview mode, and focus mode
+   - body-only authoring stats, read/edit/preview modes, and focus mode
+   - source-only Markdown formatting helpers in edit mode
    - context panel resolved from `character_ids`, `location_ids`, `timeline_ids`
    - read-only mock render package preview for the selected chapter
    - read-only validation controls for repository health checks
    - read-only Git status and diff visibility
+
+## Editor Quality-of-Life Features
+
+- Information bar with selected path, word count, character count, estimated reading time, and current mode.
+- Read mode for plain source viewing.
+- Edit mode with a wider, padded, line-height-friendly Markdown textarea.
+- Preview mode for a safe authoring preview generated from the current Markdown body.
+- Basic Markdown insertion helpers for bold, italic, heading, blockquote, and scene break syntax.
+- Clearer clean, unsaved, saving, and saved state indicators.
+- Focus mode that hides side panels while preserving the same workspace state.
+
+Markdown body text remains canonical. Formatting buttons insert Markdown syntax into the source; they do not create hidden rich-text state. The preview is an authoring aid only and does not modify source text.
 
 ## What is Real in This Pass
 
 - real manuscript discovery from local files
 - real frontmatter parsing (`id`, `title`, `type`, `order`, `status`, links, sources)
 - real chapter content display from Markdown body
-- read mode + explicit edit mode toggle for selected chapter body
-- body-only editor toolbar with selected path, word count, character count, and estimated reading time
+- body-only editing through the existing save endpoint
+- body-only editor toolbar with selected path, word count, character count, estimated reading time, and mode
 - safe authoring preview for simple Markdown structures; this is not the final OSER publishing render
 - Focus Mode that hides side/context panels with CSS while keeping the same workspace state
 - save action for manuscript body text through backend write endpoint
@@ -51,7 +64,6 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 ## What is Still Mocked / Deferred
 
 - no git branch, commit, merge, revert, or push operations
-- no AI calls
 - no OSER import, dependency, or real rendering
 - no HTML/PDF/EPUB generation from the frontend
 - no cloud sync/auth/multi-user features
@@ -61,22 +73,17 @@ This pass upgrades the frontend from mocked data to a local repository viewer.
 
 ## Run Locally
 
-From repository root, in two terminals:
-
-### Terminal 1 — backend
+From the repository root:
 
 ```bash
-cd app/backend
-npm install
-npm run dev
+npm run trurl
 ```
 
-### Terminal 2 — frontend
+Or run the two app servers separately:
 
 ```bash
-cd app/frontend
-npm install
-npm run dev
+npm run dev:backend
+npm run dev:frontend
 ```
 
-Open the Vite URL shown in terminal (usually `http://localhost:5173`).
+Open the Vite URL shown in terminal, usually `http://localhost:5173`.

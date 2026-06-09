@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
+import { renderMarkdownPreview } from '../utils/markdownPreview.js';
 
 const WORDS_PER_MINUTE = 225;
 
@@ -27,120 +28,10 @@ function getSaveDescription({ isDirty, saveState }) {
   return 'No local edits';
 }
 
-function parseInlineMarkdown(text) {
-  const nodes = [];
-  const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*)/g;
-  let lastIndex = 0;
-  let match;
-
-  while ((match = pattern.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index));
-    }
-
-    const token = match[0];
-    if (token.startsWith('**')) {
-      nodes.push(<strong key={`${match.index}-strong`}>{token.slice(2, -2)}</strong>);
-    } else {
-      nodes.push(<em key={`${match.index}-em`}>{token.slice(1, -1)}</em>);
-    }
-
-    lastIndex = match.index + token.length;
-  }
-
-  if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex));
-  }
-
-  return nodes.length > 0 ? nodes : text;
-}
-
-function renderPreviewBlocks(body) {
-  const blocks = [];
-  const lines = body.replace(/\r\n?/g, '\n').split('\n');
-  let index = 0;
-
-  while (index < lines.length) {
-    const line = lines[index];
-    const trimmed = line.trim();
-
-    if (!trimmed) {
-      index += 1;
-      continue;
-    }
-
-    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
-      blocks.push(<hr key={`hr-${index}`} />);
-      index += 1;
-      continue;
-    }
-
-    const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
-    if (headingMatch) {
-      const level = Math.min(headingMatch[1].length, 4);
-      const HeadingTag = `h${level}`;
-      blocks.push(
-        <HeadingTag key={`heading-${index}`}>
-          {parseInlineMarkdown(headingMatch[2])}
-        </HeadingTag>,
-      );
-      index += 1;
-      continue;
-    }
-
-    if (trimmed.startsWith('>')) {
-      const quoteLines = [];
-      while (index < lines.length && lines[index].trim().startsWith('>')) {
-        quoteLines.push(lines[index].trim().replace(/^>\s?/, ''));
-        index += 1;
-      }
-      blocks.push(
-        <blockquote key={`quote-${index}`}>
-          {quoteLines.map((quoteLine, quoteIndex) => (
-            <p key={`${quoteLine}-${quoteIndex}`}>{parseInlineMarkdown(quoteLine)}</p>
-          ))}
-        </blockquote>,
-      );
-      continue;
-    }
-
-    if (/^[-*]\s+/.test(trimmed)) {
-      const items = [];
-      while (index < lines.length && /^[-*]\s+/.test(lines[index].trim())) {
-        items.push(lines[index].trim().replace(/^[-*]\s+/, ''));
-        index += 1;
-      }
-      blocks.push(
-        <ul key={`list-${index}`}>
-          {items.map((item, itemIndex) => (
-            <li key={`${item}-${itemIndex}`}>{parseInlineMarkdown(item)}</li>
-          ))}
-        </ul>,
-      );
-      continue;
-    }
-
-    const paragraphLines = [];
-    while (
-      index < lines.length
-      && lines[index].trim()
-      && !lines[index].trim().match(/^(#{1,6})\s+(.+)$/)
-      && !lines[index].trim().startsWith('>')
-      && !/^[-*]\s+/.test(lines[index].trim())
-      && !/^(-{3,}|\*{3,}|_{3,})$/.test(lines[index].trim())
-    ) {
-      paragraphLines.push(lines[index].trim());
-      index += 1;
-    }
-
-    blocks.push(
-      <p key={`paragraph-${index}`}>
-        {parseInlineMarkdown(paragraphLines.join(' '))}
-      </p>,
-    );
-  }
-
-  return blocks.length > 0 ? blocks : <p className="preview-empty">No body text yet.</p>;
+function getModeLabel(mode) {
+  if (mode === 'edit') return 'edit';
+  if (mode === 'preview') return 'preview';
+  return 'read';
 }
 
 export function EditorPanel({
@@ -159,11 +50,88 @@ export function EditorPanel({
   onSelectedChapterChange,
   onToggleEditing,
 }) {
-  const [editorMode, setEditorMode] = useState('edit');
+  const [editorMode, setEditorMode] = useState('read');
+  const textareaRef = useRef(null);
+  const activeMode = isEditing ? editorMode : (editorMode === 'preview' ? 'preview' : 'read');
   const stats = useMemo(() => getEditorStats(editorBody), [editorBody]);
-  const previewBlocks = useMemo(() => renderPreviewBlocks(editorBody), [editorBody]);
+  const previewBlocks = useMemo(() => renderMarkdownPreview(editorBody), [editorBody]);
   const saveLabel = getSaveLabel({ isDirty, saveState });
   const saveDescription = getSaveDescription({ isDirty, saveState });
+
+  function switchMode(nextMode) {
+    if (nextMode === 'edit' && !isEditing) {
+      onToggleEditing();
+    }
+
+    if (nextMode === 'read' && isEditing) {
+      onToggleEditing();
+    }
+
+    setEditorMode(nextMode);
+  }
+
+  function toggleEditing() {
+    if (isEditing) {
+      setEditorMode('read');
+    } else {
+      setEditorMode('edit');
+    }
+    onToggleEditing();
+  }
+
+  function updateBodyWithSelection(nextBody, selectionStart, selectionEnd) {
+    onEditorBodyChange(nextBody);
+    window.requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+      textareaRef.current?.setSelectionRange(selectionStart, selectionEnd);
+    });
+  }
+
+  function replaceSelection(formatSelection) {
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? editorBody.length;
+    const end = textarea?.selectionEnd ?? editorBody.length;
+    const selectedText = editorBody.slice(start, end);
+    const replacement = formatSelection(selectedText);
+    const nextBody = `${editorBody.slice(0, start)}${replacement.text}${editorBody.slice(end)}`;
+    updateBodyWithSelection(
+      nextBody,
+      start + replacement.selectionStart,
+      start + replacement.selectionEnd,
+    );
+  }
+
+  function wrapSelection(before, after = before, placeholder = 'text') {
+    replaceSelection((selectedText) => {
+      const inner = selectedText || placeholder;
+      return {
+        text: `${before}${inner}${after}`,
+        selectionStart: before.length,
+        selectionEnd: before.length + inner.length,
+      };
+    });
+  }
+
+  function prefixSelectionLines(prefix, placeholder) {
+    replaceSelection((selectedText) => {
+      const inner = selectedText || placeholder;
+      const lines = inner.split('\n');
+      const text = lines.map((line) => `${prefix}${line}`).join('\n');
+      return {
+        text,
+        selectionStart: prefix.length,
+        selectionEnd: text.length,
+      };
+    });
+  }
+
+  function insertSceneBreak() {
+    replaceSelection(() => ({
+      text: '\n\n---\n\n',
+      selectionStart: 6,
+      selectionEnd: 6,
+    }));
+  }
 
   return (
     <section className="panel editor">
@@ -225,7 +193,7 @@ export function EditorPanel({
                     <strong>{saveLabel}</strong>
                     <span>{saveDescription}</span>
                   </div>
-                  <button type="button" onClick={onToggleEditing}>
+                  <button type="button" onClick={toggleEditing}>
                     {isEditing ? 'Cancel' : 'Edit'}
                   </button>
                   <button
@@ -238,7 +206,7 @@ export function EditorPanel({
                 </div>
               </div>
 
-              <div className="editor-toolbar" aria-label="Editor details">
+              <div className="editor-info-bar" aria-label="Editor details">
                 <div className="editor-stat">
                   <span>Words</span>
                   <strong>{stats.words}</strong>
@@ -251,27 +219,58 @@ export function EditorPanel({
                   <span>Reading time</span>
                   <strong>{stats.readingMinutes} min</strong>
                 </div>
+                <div className="editor-stat">
+                  <span>Mode</span>
+                  <strong>{getModeLabel(activeMode)}</strong>
+                </div>
                 <div className="editor-path">
                   <span>Path</span>
                   <strong>{selectedChapter.path}</strong>
                 </div>
                 <div className="editor-mode-toggle" aria-label="Editor mode">
                   <button
-                    className={editorMode === 'edit' ? 'active' : ''}
+                    className={activeMode === 'read' ? 'active' : ''}
                     type="button"
-                    onClick={() => setEditorMode('edit')}
+                    onClick={() => switchMode('read')}
+                  >
+                    Read
+                  </button>
+                  <button
+                    className={activeMode === 'edit' ? 'active' : ''}
+                    type="button"
+                    onClick={() => switchMode('edit')}
                   >
                     Edit
                   </button>
                   <button
-                    className={editorMode === 'preview' ? 'active' : ''}
+                    className={activeMode === 'preview' ? 'active' : ''}
                     type="button"
-                    onClick={() => setEditorMode('preview')}
+                    onClick={() => switchMode('preview')}
                   >
                     Preview
                   </button>
                 </div>
               </div>
+
+              {isEditing && (
+                <div className="format-toolbar" aria-label="Markdown formatting helpers">
+                  <button type="button" onClick={() => wrapSelection('**', '**', 'bold text')}>
+                    Bold
+                  </button>
+                  <button type="button" onClick={() => wrapSelection('*', '*', 'italic text')}>
+                    Italic
+                  </button>
+                  <button type="button" onClick={() => prefixSelectionLines('## ', 'Heading')}>
+                    Heading
+                  </button>
+                  <button type="button" onClick={() => prefixSelectionLines('> ', 'Quoted text')}>
+                    Blockquote
+                  </button>
+                  <button type="button" onClick={insertSceneBreak}>
+                    Scene break
+                  </button>
+                </div>
+              )}
 
               <div className="chapter-meta">
                 <span>ID: {selectedChapter.id}</span>
@@ -279,12 +278,13 @@ export function EditorPanel({
                 <span>Status: {selectedChapter.status}</span>
               </div>
 
-              {editorMode === 'preview' ? (
+              {activeMode === 'preview' ? (
                 <div className="authoring-preview" aria-label="Authoring Markdown preview">
                   {previewBlocks}
                 </div>
-              ) : isEditing ? (
+              ) : activeMode === 'edit' ? (
                 <textarea
+                  ref={textareaRef}
                   className="chapter-editor"
                   value={editorBody}
                   onChange={(event) => onEditorBodyChange(event.target.value)}
