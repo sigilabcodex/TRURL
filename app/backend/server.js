@@ -2,6 +2,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleAiRoute } from './routes/ai.js';
+import { handleExportRoute } from './routes/export.js';
 import { handleGitRoute } from './routes/git.js';
 import { handleRenderRoute } from './routes/render.js';
 import { handleValidateRoute } from './routes/validate.js';
@@ -36,6 +37,7 @@ const routeHandlers = [
   handleAiRoute,
   handleRenderRoute,
   handleValidateRoute,
+  handleExportRoute,
   handleGitRoute,
 ];
 
