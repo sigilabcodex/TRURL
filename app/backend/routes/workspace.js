@@ -1,9 +1,11 @@
 import path from 'node:path';
 import { readMarkdownDirectory, saveManuscriptBody } from '../lib/manuscript.js';
+import { loadProject } from '../lib/project.js';
 import { mapById, toEntityRecord } from '../lib/story-bible.js';
 
-async function buildWorkspaceSnapshot(repoRoot) {
-  const [manuscriptRaw, characterRaw, locationRaw, timelineRaw, notesRaw, revisionRaw] = await Promise.all([
+export async function buildWorkspaceSnapshot(repoRoot) {
+  const [project, manuscriptRaw, characterRaw, locationRaw, timelineRaw, notesRaw, revisionRaw] = await Promise.all([
+    loadProject(repoRoot),
     readMarkdownDirectory(repoRoot, 'manuscript'),
     readMarkdownDirectory(repoRoot, path.join('story-bible', 'characters')),
     readMarkdownDirectory(repoRoot, path.join('story-bible', 'locations')),
@@ -34,6 +36,7 @@ async function buildWorkspaceSnapshot(repoRoot) {
 
   return {
     mode: 'local-repository',
+    project,
     generatedAt: new Date().toISOString(),
     sections: {
       manuscript: chapters.length,

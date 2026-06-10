@@ -1,0 +1,16 @@
+{
+  "schema": "trurl-project/v0",
+  "title": "TRURL Demo Project",
+  "defaultDocument": "main",
+  "documents": [
+    {
+      "id": "main",
+      "title": "Main Manuscript",
+      "manuscriptPath": "manuscript",
+      "storyBiblePath": "story-bible",
+      "notesPath": "notes",
+      "revisionPath": "revision",
+      "renderPresets": ["editorial-default"]
+    }
+  ]
+}

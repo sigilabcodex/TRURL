@@ -181,7 +181,7 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <h1>TRURL — Local Repository Workspace</h1>
+        <h1>{workspace?.project?.title || 'TRURL — Local Repository Workspace'}</h1>
         <span className="badge">Mode: {workspace?.mode || 'loading...'}</span>
       </header>
 
@@ -190,6 +190,7 @@ export function App() {
           activeSection={activeSection}
           isEditing={isEditing}
           selectedChapter={selectedChapter}
+          project={workspace?.project}
           sections={workspace?.sections}
           onActiveSectionChange={setActiveSection}
         />

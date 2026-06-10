@@ -72,6 +72,31 @@ alias trurl='cd /path/to/TRURL && npm run trurl'
 
 A real global `trurl` binary is intentionally deferred to a future packaging step.
 
+## Project Manifest
+
+TRURL can read optional project metadata from `.trurl/project.json`. The current repository includes a minimal manifest:
+
+```json
+{
+  "schema": "trurl-project/v0",
+  "title": "TRURL Demo Project",
+  "defaultDocument": "main",
+  "documents": [
+    {
+      "id": "main",
+      "title": "Main Manuscript",
+      "manuscriptPath": "manuscript",
+      "storyBiblePath": "story-bible",
+      "notesPath": "notes",
+      "revisionPath": "revision",
+      "renderPresets": ["editorial-default"]
+    }
+  ]
+}
+```
+
+Projects without this file still load with the existing one-repository/one-project defaults. The manifest is a backwards-compatible metadata foundation only; multi-project switching UI, databases, and cloud sync are deferred.
+
 ## Testing
 
 Run the lightweight local test suite from the repository root:

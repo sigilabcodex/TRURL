@@ -25,13 +25,20 @@ function renderCount(sectionKey, sections) {
 export function WorkspaceSidebar({
   activeSection,
   isEditing,
+  project,
   selectedChapter,
   sections,
   onActiveSectionChange,
 }) {
   return (
     <aside className="panel sidebar">
-      <h2>Repository</h2>
+      <h2>{project?.title || 'Repository'}</h2>
+      {project?.source && (
+        <p className="project-source">Project: {project.source}</p>
+      )}
+      {project?.warnings?.length > 0 && (
+        <p className="project-warning">Project manifest warning</p>
+      )}
       <nav>
         <ul>
           {repositorySections.map((section) => {

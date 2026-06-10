@@ -888,3 +888,15 @@ h3 {
   background: #101828;
   color: #fff;
 }
+
+.project-source,
+.project-warning {
+  margin: -0.35rem 0 0.75rem;
+  color: #475467;
+  font-size: 0.76rem;
+}
+
+.project-warning {
+  color: #b54708;
+  font-weight: 700;
+}
