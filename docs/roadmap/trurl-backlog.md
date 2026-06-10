@@ -14,6 +14,7 @@ TRURL currently has a working local alpha foundation:
 - Safe Markdown authoring preview helper with lightweight parsing tests.
 - Optional `.trurl/project.json` project manifest foundation.
 - `project.currentDocument` metadata exposed by `GET /api/workspace`.
+- Read-only document selector groundwork in the transport bar; real switching remains deferred.
 - Mock render package preview for the future TRURL to OSER boundary.
 - Validation panel for frontmatter, cross-reference, and manuscript-order checks.
 - Read-only Git status and scoped diff visibility.
@@ -53,7 +54,7 @@ TRURL is not yet:
 
 ### P1
 
-- Document selector and multi-document groundwork: introduce read-only or mock UI first, then real selection after the data model is proven.
+- Document selector and multi-document groundwork: read-only selector is in place; real selection waits until the data model and folder-loading behavior are proven.
 - OSER-backed preview or export bridge: replace mock package behavior with an explicit, testable adapter boundary.
 - AI revision proposal endpoint: return structured suggestions and unified diffs only; do not apply changes automatically.
 - Richer editor foundation evaluation: likely CodeMirror as a Markdown source editor before any WYSIWYG or block editor.
@@ -266,7 +267,9 @@ Verification checklist:
 - Invalid paths and missing fields produce warnings or validation errors.
 - Projects without a manifest still load defaults.
 
-### C. Add Document Selector Read-Only UI
+### C. Document Selector Read-Only UI
+
+Status: Implemented as frontend groundwork. Keep future work focused on real selection only after folder-loading and save semantics are designed.
 
 Goal: Display available documents from `project.documents` without changing the active document or folder loading behavior.
 

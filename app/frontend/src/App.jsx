@@ -217,7 +217,6 @@ export function App() {
 
       <TransportBar
         activeTool={activeTool}
-        currentDocument={workspace?.project?.currentDocument}
         isDirty={isDirty}
         isFocusMode={isFocusMode}
         project={workspace?.project}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { DocumentSelector } from './DocumentSelector.jsx';
 import { WORKSPACE_TOOLS } from '../utils/workspaceTools.js';
 
 function getSaveLabel({ isDirty, saveState }) {
@@ -10,7 +11,6 @@ function getSaveLabel({ isDirty, saveState }) {
 
 export function TransportBar({
   activeTool,
-  currentDocument,
   isDirty,
   isFocusMode,
   project,
@@ -31,10 +31,7 @@ export function TransportBar({
           <span className="transport-label">Project</span>
           <strong>{project?.title || 'TRURL Workspace'}</strong>
         </div>
-        <div>
-          <span className="transport-label">Document</span>
-          <strong>{currentDocument?.title || 'No document'}</strong>
-        </div>
+        <DocumentSelector project={project} isFocusMode={isFocusMode} />
         <div className="transport-chapter">
           <span className="transport-label">Chapter</span>
           <strong>{selectedChapter?.title || 'No chapter selected'}</strong>
