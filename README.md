@@ -23,6 +23,7 @@ The goal is not to replace authorship with automation. The goal is to create a s
 - `docs/spec/WORKFLOW.md`
 - `docs/spec/SAMPLE_CORPUS.md`
 - `docs/architecture/oser-integration.md` — planned TRURL ↔ OSER rendering/export architecture boundary
+- `docs/roadmap/trurl-backlog.md` — current backlog, priorities, open decisions, and next implementation slices
 
 ## Validation Scripts
 
