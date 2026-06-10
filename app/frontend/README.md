@@ -38,8 +38,11 @@ This pass upgrades the frontend from mocked data to a local repository viewer an
 - Clearer clean, unsaved, saving, and saved state indicators.
 - Polished Focus Mode that centers the editor, hides side panels, and gives the writing surface more room while preserving the same workspace state.
 - Layout polish that keeps the three-column workspace but gives the editor more usable width and makes diagnostics less dominant.
+- Lightweight frontend themes for long writing sessions: Light, Dark, Sepia / Paper, Solar / Warm, and Midnight.
 
 Markdown body text remains canonical. Formatting buttons insert Markdown syntax into the source; they do not create hidden rich-text state. The preview is an authoring aid only and does not modify source text. These layout changes do not alter frontend state architecture or backend behavior.
+
+Theme selection is stored in browser `localStorage` under `trurl.theme`. Themes are frontend-only preferences; they do not change repository files, backend state, project manifests, or exported output.
 
 ## What is Real in This Pass
 
@@ -50,6 +53,7 @@ Markdown body text remains canonical. Formatting buttons insert Markdown syntax 
 - body-only editor toolbar with selected path, word count, character count, estimated reading time, and mode
 - safe authoring preview for simple Markdown structures; this is not the final OSER publishing render
 - Focus Mode that hides side/context panels with CSS while keeping the same workspace state
+- local theme selection for comfortable reading and writing palettes
 - save action for manuscript body text through backend write endpoint
 - clearer saved/saving/unsaved state indicator while editing
 - real context resolution against story-bible IDs

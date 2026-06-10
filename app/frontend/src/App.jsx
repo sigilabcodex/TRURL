@@ -3,9 +3,25 @@ import { ContextPanel } from './components/ContextPanel.jsx';
 import { EditorPanel } from './components/EditorPanel.jsx';
 import { WorkspaceSidebar } from './components/WorkspaceSidebar.jsx';
 import { resolveLinkedEntities } from './utils/context.js';
+import { DEFAULT_THEME_ID, THEMES, normalizeThemeId } from './utils/themes.js';
+
+const THEME_STORAGE_KEY = 'trurl.theme';
+
+function getInitialThemeId() {
+  if (typeof window === 'undefined') {
+    return DEFAULT_THEME_ID;
+  }
+
+  try {
+    return normalizeThemeId(window.localStorage.getItem(THEME_STORAGE_KEY));
+  } catch {
+    return DEFAULT_THEME_ID;
+  }
+}
 
 export function App() {
   const [workspace, setWorkspace] = useState(null);
+  const [themeId, setThemeId] = useState(getInitialThemeId);
   const [activeSection, setActiveSection] = useState('Manuscript');
   const [selectedChapterId, setSelectedChapterId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -53,6 +69,14 @@ export function App() {
   useEffect(() => {
     loadWorkspace();
   }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, themeId);
+    } catch {
+      // Theme persistence is a local preference; the UI can still run without storage.
+    }
+  }, [themeId]);
 
   const selectedChapter = useMemo(() => (
     workspace?.chapters.find((chapter) => chapter.id === selectedChapterId) || null
@@ -179,7 +203,7 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-theme={themeId}>
       <header className="topbar">
         <h1>{workspace?.project?.title || 'TRURL — Local Repository Workspace'}</h1>
         <span className="badge">Mode: {workspace?.mode || 'loading...'}</span>
@@ -193,7 +217,10 @@ export function App() {
           selectedChapter={selectedChapter}
           project={workspace?.project}
           sections={workspace?.sections}
+          themeId={themeId}
+          themes={THEMES}
           onActiveSectionChange={setActiveSection}
+          onThemeChange={setThemeId}
         />
         <EditorPanel
           editorBody={editorBody}
