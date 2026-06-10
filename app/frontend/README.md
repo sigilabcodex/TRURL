@@ -36,9 +36,10 @@ This pass upgrades the frontend from mocked data to a local repository viewer an
 - Preview mode for a safe authoring preview generated from the current Markdown body.
 - Basic Markdown insertion helpers for bold, italic, heading, blockquote, and scene break syntax.
 - Clearer clean, unsaved, saving, and saved state indicators.
-- Focus mode that hides side panels while preserving the same workspace state.
+- Polished Focus Mode that centers the editor, hides side panels, and gives the writing surface more room while preserving the same workspace state.
+- Layout polish that keeps the three-column workspace but gives the editor more usable width and makes diagnostics less dominant.
 
-Markdown body text remains canonical. Formatting buttons insert Markdown syntax into the source; they do not create hidden rich-text state. The preview is an authoring aid only and does not modify source text.
+Markdown body text remains canonical. Formatting buttons insert Markdown syntax into the source; they do not create hidden rich-text state. The preview is an authoring aid only and does not modify source text. These layout changes do not alter frontend state architecture or backend behavior.
 
 ## What is Real in This Pass
 

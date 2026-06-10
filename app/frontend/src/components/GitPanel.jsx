@@ -53,18 +53,18 @@ export function GitPanel({
       )}
 
       {gitDiff && (
-        <div className="git-output">
-          <div className="validation-check-header">
-            <strong>Diff</strong>
+        <details className="git-output git-diff-output">
+          <summary>
+            <span>Diff</span>
             <code>{gitDiff.ok ? 'ok' : 'fail'}</code>
-          </div>
+          </summary>
           {gitDiff.commands.map((command) => (
             <div key={command.name}>
               <small>{command.command}</small>
               <pre>{command.stdout || command.stderr || '(no output)'}</pre>
             </div>
           ))}
-        </div>
+        </details>
       )}
     </section>
   );
