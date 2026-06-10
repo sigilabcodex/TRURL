@@ -77,6 +77,119 @@ TRURL is not yet:
 - Database-backed mode.
 - Full semantic block editor.
 
+
+## Writing Tool Inspirations: Scrivener, Manuskript, and TRURL
+
+Scrivener and Manuskript are useful references because they treat longform writing as more than a single text buffer. They model writing as a project made of composition, organization, research, outline management, metadata, revision, and compile/export workflows. TRURL should study those patterns without cloning their product shape or abandoning its repository-first design.
+
+### Why These Tools Matter
+
+They are useful because they center workflows that matter for books and other longform projects:
+
+- Project organization: documents, sections, folders, research, and project-level metadata live together.
+- Composition: drafting happens in manageable units rather than one giant file.
+- Research management: notes and references are close to the manuscript but separate from source prose.
+- Outline management: structure can be inspected, rearranged, and annotated.
+- Metadata: chapters and scenes can carry status, labels, summaries, targets, and revision notes.
+- Revision: writers need snapshots, comparisons, draft states, and change review.
+- Compile/export: writing source and final output are related but not the same concern.
+
+### What TRURL Should Learn
+
+TRURL should adapt these concepts in a source-first way:
+
+- Binder/project tree: a navigation model for project, documents, manuscript files, notes, research, and canon records.
+- Corkboard/card view: a card-based overview for chapters or scenes using titles, summaries, status, and order.
+- Outliner: a dense structural view for document order, metadata, progress, and validation state.
+- Chapter/scene metadata: explicit status, summary, target, POV, location, timeline, and revision fields where they fit TRURL conventions.
+- Character/location/timeline integration: canon-aware writing context should remain a first-class part of the workspace.
+- Research folder: keep notes, references, source excerpts, and preparation material close to the manuscript without mixing them into canonical prose.
+- Snapshots/versioning: use Git-native snapshots and diffs rather than inventing a hidden history system.
+- Writing targets: document, chapter, scene, and session progress can help writers understand momentum.
+- Status tracking: draft/revised/locked/deprecated and later custom labels should be visible and filterable.
+- Compile/export pipeline: TRURL should prepare source and render intent; OSER should own final rendering.
+- Distraction-free writing mode: Focus Mode should keep improving as the primary drafting surface.
+
+### What TRURL Should Not Copy Blindly
+
+TRURL should avoid patterns that conflict with its source-first model:
+
+- Do not become a proprietary monolith.
+- Do not hide source files in opaque project formats.
+- Do not make rich editor state the source of truth too early.
+- Do not replace Git with an internal history system.
+- Do not make export styling inseparable from writing.
+- Do not require cloud sync.
+- Do not make project organization depend on a database before plain files and manifests have been exhausted.
+
+### TRURL's Differentiators
+
+TRURL's direction should remain distinct:
+
+- Markdown/source-first.
+- Git-native.
+- Local-first.
+- Project and canon aware.
+- AI-assisted but not AI-owned.
+- OSER-compatible for publishing and export.
+- Friendly to open formats and reviewable text diffs.
+- Eventually useful for books, essays, articles, translations, editions, and microsites.
+
+### Possible Scrivener/Manuskript-Inspired Features
+
+#### P0 / Current Foundation
+
+- Project manifest.
+- Document metadata.
+- Chapter list.
+- Story-bible links.
+- Focus Mode.
+- Validation.
+- Git status and scoped diff visibility.
+
+#### P1 / Near-Term
+
+- Document selector.
+- Outliner view.
+- Card/corkboard view for chapters.
+- Chapter/scene metadata editor.
+- Writing targets and progress.
+- Research/notes panel.
+- Snapshots via Git.
+- Better search.
+
+#### P2
+
+- Drag-to-reorder outline with safe frontmatter updates.
+- Split editor / compare view.
+- Revision workflow.
+- AI-assisted summaries and consistency checks.
+- OSER-backed preview/export presets.
+
+#### Later
+
+- Full semantic editor.
+- Plugin system.
+- Collaboration.
+- Optional cloud sync.
+- Global packaged app.
+
+## Local AI Strategy
+
+TRURL should support local models first where practical. Ollama is already a useful integration target because it fits TRURL's local-first posture and can be run without sending manuscripts or canon records to external services. Specific model choices should remain examples to test later, not permanent product recommendations.
+
+Local models should initially be used for bounded tasks:
+
+- Summarization.
+- Metadata extraction.
+- Character/location detection.
+- Outline suggestions.
+- Canon consistency hints.
+- Revision suggestions.
+- Style checks.
+
+AI should propose, not silently modify. AI outputs should be reviewable as structured proposals, warnings, or unified diffs. External/cloud models can remain optional later, but TRURL should not require them for core local workflows.
+
 ## Open Architecture Decisions
 
 ### Editor Model
@@ -103,9 +216,30 @@ AI proposals should be represented as structured suggestions and reviewable diff
 
 Exports may be generated files or ephemeral previews. Generated exports are useful when reproducibility and review matter; ephemeral previews are useful for quick author feedback. The boundary should stay explicit, with source files never treated as derived output.
 
-## Proposed Next 5 Codex Slices
+## Proposed Next Implementation Slices
 
-### A. Project Manifest JSON Schema and Tests
+### A. Create Roadmap/Backlog Document If Missing
+
+Goal: Keep a living backlog that captures product direction, priorities, safety rules, and next implementation slices.
+
+Files likely touched:
+
+- `docs/roadmap/trurl-backlog.md`
+- `README.md`
+
+Non-goals:
+
+- No app behavior changes.
+- No backend endpoint changes.
+- No dependencies.
+
+Verification checklist:
+
+- `npm run check`
+- README links to the roadmap.
+- Roadmap renders as readable Markdown.
+
+### B. Add Project Manifest JSON Schema
 
 Goal: Add a formal schema for `.trurl/project.json` and test the current manifest against it.
 
@@ -130,9 +264,9 @@ Verification checklist:
 - Invalid paths and missing fields produce warnings or validation errors.
 - Projects without a manifest still load defaults.
 
-### B. Current Document Display Polish and Read-Only Selector Mock
+### C. Add Document Selector Read-Only UI
 
-Goal: Improve document metadata display and optionally add a non-switching document selector mock to clarify the future UI.
+Goal: Display available documents from `project.documents` without changing the active document or folder loading behavior.
 
 Files likely touched:
 
@@ -152,42 +286,93 @@ Verification checklist:
 - `npm run build`
 - `npm run check`
 - Workspace loads with and without a manifest.
-- Sidebar still shows selected chapter and current document metadata.
+- UI clearly marks the current document.
 
-### C. OSER Preview/Export Status Panel Improvements
+### D. Add Outliner View
 
-Goal: Make the render package panel a clearer staging area for the future OSER bridge.
+Goal: Add a structural view of manuscript chapters with order, title, status, path, and linked canon counts.
 
 Files likely touched:
 
-- `app/frontend/src/components/RenderPackagePanel.jsx`
+- `app/frontend/src/App.jsx`
+- New or existing frontend components under `app/frontend/src/components/`
 - `app/frontend/src/styles.css`
-- `app/backend/lib/render-package.js`
-- `docs/architecture/oser-integration.md`
+- `app/frontend/README.md`
 
 Non-goals:
 
-- No real OSER dependency.
-- No export file writes.
-- No new rendering endpoint unless separately approved.
+- No drag reorder.
+- No frontmatter editing.
+- No document switching.
 
 Verification checklist:
 
 - `npm run build`
 - `npm run check`
-- Mock render package still returns deterministic data.
-- Existing panel remains usable when no chapter is selected.
+- Outliner reflects existing workspace data.
+- Selecting a row does not alter save behavior.
 
-### D. AI Proposal Endpoint Returning Suggestion and Unified Diff Only
+### E. Add Chapter/Scene Metadata Editor
 
-Goal: Add a safe AI proposal endpoint that returns a structured suggestion and unified diff without applying changes.
+Goal: Design and implement a safe metadata editing path for selected frontmatter fields after schema and UX rules are clear.
+
+Files likely touched:
+
+- `app/backend/lib/manuscript.js`
+- `app/backend/routes/workspace.js` or a new route only if approved
+- `app/frontend/src/components/EditorPanel.jsx`
+- `schema/`
+- `test/`
+- `app/backend/README.md`
+
+Non-goals:
+
+- No arbitrary frontmatter rewrite.
+- No body text changes as part of metadata saves.
+- No drag reorder in this slice.
+
+Verification checklist:
+
+- `npm run test`
+- `npm run check`
+- Existing body-only save remains unchanged.
+- Metadata edits preserve unrelated frontmatter fields and formatting as much as practical.
+
+### F. Add Writing Targets
+
+Goal: Add optional project, document, chapter, or session writing targets derived from source metrics and future metadata.
+
+Files likely touched:
+
+- `.trurl/project.json` or future manifest schema
+- `app/backend/lib/project.js`
+- `app/frontend/src/components/EditorPanel.jsx`
+- `app/frontend/src/components/WorkspaceSidebar.jsx`
+- `test/`
+
+Non-goals:
+
+- No cloud analytics.
+- No background tracking service.
+- No hidden state outside repository files.
+
+Verification checklist:
+
+- `npm run test`
+- `npm run check`
+- Missing targets are handled gracefully.
+- Word counts remain consistent with editor stats.
+
+### G. Add AI Proposal Endpoint Returning Reviewable Suggestions/Diffs Only
+
+Goal: Add a safe AI proposal endpoint that returns structured suggestions and unified diffs without applying changes.
 
 Files likely touched:
 
 - `app/backend/routes/ai.js`
 - `app/backend/ai/`
 - `app/backend/lib/manuscript.js`
-- `app/frontend/src/components/ContextPanel.jsx` or a new AI panel component
+- Frontend AI panel or `ContextPanel` integration
 - `test/`
 - `app/backend/README.md`
 
@@ -206,35 +391,38 @@ Verification checklist:
 - Response includes source path, suggestion metadata, and diff text.
 - Manuscript files remain unchanged after request.
 
-### E. CodeMirror Feasibility Spike Behind a Flag or Isolated Branch
+### H. Add OSER-Backed Preview/Export Bridge
 
-Goal: Evaluate CodeMirror as a Markdown source editor without committing TRURL to a new editor architecture.
+Goal: Replace the mock-only render path with an explicit bridge that can call OSER or an OSER-compatible adapter when configured.
 
 Files likely touched:
 
-- `app/frontend/package.json`
-- `app/frontend/src/components/EditorPanel.jsx` or isolated prototype component
-- `app/frontend/src/styles.css`
-- `docs/architecture/editor-and-projects.md`
+- `app/backend/lib/render-package.js`
+- `app/backend/routes/render.js`
+- `app/frontend/src/components/RenderPackagePanel.jsx`
+- `docs/architecture/oser-integration.md`
+- `test/`
 
 Non-goals:
 
-- No WYSIWYG editor.
-- No hidden rich-text state.
-- No default replacement of the textarea until tradeoffs are documented.
+- No implicit export writes.
+- No generated output as source of truth.
+- No required OSER dependency until the adapter contract is stable.
 
 Verification checklist:
 
-- `npm run build`
+- `npm run test`
 - `npm run check`
-- Body-only save behavior remains unchanged.
-- Markdown source round-trips exactly for representative samples.
-- The spike can be disabled or removed cleanly.
+- Mock mode remains available.
+- Preview/export diagnostics are explicit.
+- Source files remain unchanged by preview requests.
 
 ## Safety Rules
 
+- Markdown and frontmatter remain the source of truth.
 - Preserve manuscript frontmatter unless a task explicitly changes frontmatter behavior.
 - Use body-only save for manuscript edits unless a separate approved design expands this.
+- No opaque project database.
 - Do not execute arbitrary shell or Git commands from backend requests.
 - Keep Git endpoints read-only until a dedicated Git workflow is designed.
 - Do not let AI write files without explicit user action and a visible diff.
