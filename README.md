@@ -72,6 +72,22 @@ alias trurl='cd /path/to/TRURL && npm run trurl'
 
 A real global `trurl` binary is intentionally deferred to a future packaging step.
 
+## Testing
+
+Run the lightweight local test suite from the repository root:
+
+```bash
+npm run test
+```
+
+Run tests, backend syntax checks, launcher syntax check, and the frontend production build together:
+
+```bash
+npm run check
+```
+
+The test suite uses Node's built-in test runner and avoids browser automation for now.
+
 ## Folder Layout
 
 - `docs/` — project-level documentation, specifications, and architecture

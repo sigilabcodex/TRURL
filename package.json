@@ -9,6 +9,7 @@
     "dev:backend": "npm --prefix app/backend run dev",
     "dev:frontend": "npm --prefix app/frontend run dev",
     "build": "npm --prefix app/frontend run build",
-    "check": "node --check app/backend/server.js && node --check app/backend/lib/*.js && node --check app/backend/routes/*.js && npm run build"
+    "check": "node --check scripts/dev-trurl.mjs && node --check app/backend/server.js && node --check app/backend/lib/*.js && node --check app/backend/routes/*.js && npm run test && npm run build",
+    "test": "node --test"
   }
 }

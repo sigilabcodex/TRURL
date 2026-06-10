@@ -1,21 +1,15 @@
 import React from 'react';
 
-function parseInlineMarkdown(text, keyPrefix) {
+function parseInlineMarkdown(text) {
   const nodes = [];
   let index = 0;
-  let nodeIndex = 0;
 
   while (index < text.length) {
     if (text.startsWith('**', index)) {
       const end = text.indexOf('**', index + 2);
       if (end > index + 2) {
-        nodes.push(React.createElement(
-          'strong',
-          { key: `${keyPrefix}-strong-${nodeIndex}` },
-          text.slice(index + 2, end),
-        ));
+        nodes.push({ type: 'strong', text: text.slice(index + 2, end) });
         index = end + 2;
-        nodeIndex += 1;
         continue;
       }
     }
@@ -23,13 +17,8 @@ function parseInlineMarkdown(text, keyPrefix) {
     if (text[index] === '*') {
       const end = text.indexOf('*', index + 1);
       if (end > index + 1) {
-        nodes.push(React.createElement(
-          'em',
-          { key: `${keyPrefix}-em-${nodeIndex}` },
-          text.slice(index + 1, end),
-        ));
+        nodes.push({ type: 'em', text: text.slice(index + 1, end) });
         index = end + 1;
-        nodeIndex += 1;
         continue;
       }
     }
@@ -38,11 +27,11 @@ function parseInlineMarkdown(text, keyPrefix) {
     const nextItalic = text.indexOf('*', index + 1);
     const nextMarkers = [nextBold, nextItalic].filter((markerIndex) => markerIndex !== -1);
     const nextIndex = nextMarkers.length ? Math.min(...nextMarkers) : text.length;
-    nodes.push(text.slice(index, nextIndex));
+    nodes.push({ type: 'text', text: text.slice(index, nextIndex) });
     index = nextIndex;
   }
 
-  return nodes.length > 0 ? nodes : text;
+  return nodes.length > 0 ? nodes : [{ type: 'text', text }];
 }
 
 function isHeading(trimmed) {
@@ -57,7 +46,7 @@ function isUnorderedListItem(trimmed) {
   return /^[-*]\s+/.test(trimmed);
 }
 
-export function renderMarkdownPreview(body) {
+export function parseMarkdownPreview(body) {
   const blocks = [];
   const lines = body.replace(/\r\n?/g, '\n').split('\n');
   let index = 0;
@@ -72,65 +61,45 @@ export function renderMarkdownPreview(body) {
     }
 
     if (isHorizontalRule(trimmed)) {
-      blocks.push(React.createElement('hr', { key: `hr-${index}` }));
+      blocks.push({ type: 'hr' });
       index += 1;
       continue;
     }
 
     const headingMatch = trimmed.match(/^(#{1,3})\s+(.+)$/);
     if (headingMatch) {
-      const HeadingTag = `h${headingMatch[1].length}`;
-      blocks.push(React.createElement(
-        HeadingTag,
-        { key: `heading-${index}` },
-        parseInlineMarkdown(headingMatch[2], `heading-${index}`),
-      ));
+      blocks.push({
+        type: 'heading',
+        level: headingMatch[1].length,
+        children: parseInlineMarkdown(headingMatch[2]),
+      });
       index += 1;
       continue;
     }
 
     if (trimmed.startsWith('>')) {
-      const quoteLines = [];
-      const startIndex = index;
+      const paragraphs = [];
       while (index < lines.length && lines[index].trim().startsWith('>')) {
-        quoteLines.push(lines[index].trim().replace(/^>\s?/, ''));
+        paragraphs.push(parseInlineMarkdown(lines[index].trim().replace(/^>\s?/, '')));
         index += 1;
       }
 
-      blocks.push(React.createElement(
-        'blockquote',
-        { key: `quote-${startIndex}` },
-        quoteLines.map((quoteLine, quoteIndex) => React.createElement(
-          'p',
-          { key: `quote-${startIndex}-${quoteIndex}` },
-          parseInlineMarkdown(quoteLine, `quote-${startIndex}-${quoteIndex}`),
-        )),
-      ));
+      blocks.push({ type: 'blockquote', paragraphs });
       continue;
     }
 
     if (isUnorderedListItem(trimmed)) {
       const items = [];
-      const startIndex = index;
       while (index < lines.length && isUnorderedListItem(lines[index].trim())) {
-        items.push(lines[index].trim().replace(/^[-*]\s+/, ''));
+        items.push(parseInlineMarkdown(lines[index].trim().replace(/^[-*]\s+/, '')));
         index += 1;
       }
 
-      blocks.push(React.createElement(
-        'ul',
-        { key: `list-${startIndex}` },
-        items.map((item, itemIndex) => React.createElement(
-          'li',
-          { key: `list-${startIndex}-${itemIndex}` },
-          parseInlineMarkdown(item, `list-${startIndex}-${itemIndex}`),
-        )),
-      ));
+      blocks.push({ type: 'list', items });
       continue;
     }
 
     const paragraphLines = [];
-    const startIndex = index;
     while (
       index < lines.length
       && lines[index].trim()
@@ -143,14 +112,77 @@ export function renderMarkdownPreview(body) {
       index += 1;
     }
 
-    blocks.push(React.createElement(
-      'p',
-      { key: `paragraph-${startIndex}` },
-      parseInlineMarkdown(paragraphLines.join(' '), `paragraph-${startIndex}`),
-    ));
+    blocks.push({
+      type: 'paragraph',
+      children: parseInlineMarkdown(paragraphLines.join(' ')),
+    });
   }
 
+  return blocks;
+}
+
+function renderInlineNodes(nodes, keyPrefix) {
+  return nodes.map((node, index) => {
+    if (node.type === 'strong') {
+      return React.createElement('strong', { key: `${keyPrefix}-strong-${index}` }, node.text);
+    }
+
+    if (node.type === 'em') {
+      return React.createElement('em', { key: `${keyPrefix}-em-${index}` }, node.text);
+    }
+
+    return node.text;
+  });
+}
+
+function renderBlock(block, index) {
+  if (block.type === 'hr') {
+    return React.createElement('hr', { key: `hr-${index}` });
+  }
+
+  if (block.type === 'heading') {
+    return React.createElement(
+      `h${block.level}`,
+      { key: `heading-${index}` },
+      renderInlineNodes(block.children, `heading-${index}`),
+    );
+  }
+
+  if (block.type === 'blockquote') {
+    return React.createElement(
+      'blockquote',
+      { key: `quote-${index}` },
+      block.paragraphs.map((paragraph, paragraphIndex) => React.createElement(
+        'p',
+        { key: `quote-${index}-${paragraphIndex}` },
+        renderInlineNodes(paragraph, `quote-${index}-${paragraphIndex}`),
+      )),
+    );
+  }
+
+  if (block.type === 'list') {
+    return React.createElement(
+      'ul',
+      { key: `list-${index}` },
+      block.items.map((item, itemIndex) => React.createElement(
+        'li',
+        { key: `list-${index}-${itemIndex}` },
+        renderInlineNodes(item, `list-${index}-${itemIndex}`),
+      )),
+    );
+  }
+
+  return React.createElement(
+    'p',
+    { key: `paragraph-${index}` },
+    renderInlineNodes(block.children, `paragraph-${index}`),
+  );
+}
+
+export function renderMarkdownPreview(body) {
+  const blocks = parseMarkdownPreview(body);
+
   return blocks.length > 0
-    ? blocks
+    ? blocks.map(renderBlock)
     : React.createElement('p', { className: 'preview-empty' }, 'No body text yet.');
 }
