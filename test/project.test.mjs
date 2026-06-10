@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { loadProject, validateProjectManifest } from '../app/backend/lib/project.js';
+import { getDefaultDocument, loadProject, validateProjectManifest } from '../app/backend/lib/project.js';
 import { buildWorkspaceSnapshot } from '../app/backend/routes/workspace.js';
 
 const validManifest = {
@@ -32,6 +32,36 @@ async function writeManifest(repoRoot, manifestText) {
   await fs.writeFile(path.join(repoRoot, '.trurl', 'project.json'), manifestText, 'utf8');
 }
 
+
+test('getDefaultDocument returns the defaultDocument match', () => {
+  const project = {
+    defaultDocument: 'secondary',
+    documents: [
+      { id: 'main', title: 'Main' },
+      { id: 'secondary', title: 'Secondary' },
+    ],
+  };
+
+  assert.deepEqual(getDefaultDocument(project), { id: 'secondary', title: 'Secondary' });
+});
+
+test('getDefaultDocument falls back to the first document', () => {
+  const project = {
+    defaultDocument: 'missing',
+    documents: [
+      { id: 'main', title: 'Main' },
+      { id: 'secondary', title: 'Secondary' },
+    ],
+  };
+
+  assert.deepEqual(getDefaultDocument(project), { id: 'main', title: 'Main' });
+});
+
+test('getDefaultDocument handles empty documents', () => {
+  assert.equal(getDefaultDocument({ defaultDocument: 'main', documents: [] }), null);
+  assert.equal(getDefaultDocument({ defaultDocument: 'main' }), null);
+});
+
 test('default project loads when manifest is missing', async () => {
   const repoRoot = await makeTempRepo();
   const project = await loadProject(repoRoot);
@@ -41,6 +71,7 @@ test('default project loads when manifest is missing', async () => {
   assert.equal(project.documents[0].manuscriptPath, 'manuscript');
   assert.equal(project.source, 'default');
   assert.deepEqual(project.warnings, []);
+  assert.deepEqual(project.currentDocument, project.documents[0]);
 });
 
 test('project manifest loads when present', async () => {
@@ -53,6 +84,7 @@ test('project manifest loads when present', async () => {
   assert.equal(project.source, '.trurl/project.json');
   assert.deepEqual(project.warnings, []);
   assert.deepEqual(project.documents, validManifest.documents);
+  assert.deepEqual(project.currentDocument, validManifest.documents[0]);
 });
 
 test('invalid project manifest returns default project with warning', async () => {
@@ -89,6 +121,7 @@ test('workspace snapshot includes project metadata', async () => {
   assert.equal(snapshot.project.title, 'TRURL Demo Project');
   assert.equal(snapshot.project.defaultDocument, 'main');
   assert.equal(snapshot.project.documents[0].manuscriptPath, 'manuscript');
+  assert.deepEqual(snapshot.project.currentDocument, snapshot.project.documents[0]);
   assert.equal(snapshot.project.source, '.trurl/project.json');
   assert.deepEqual(snapshot.project.warnings, []);
 });

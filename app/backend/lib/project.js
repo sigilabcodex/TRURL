@@ -4,8 +4,40 @@ import path from 'node:path';
 const PROJECT_SCHEMA = 'trurl-project/v0';
 const PROJECT_MANIFEST_PATH = path.join('.trurl', 'project.json');
 
-export function createDefaultProject(warnings = []) {
+export function getDefaultDocument(project) {
+  const documents = Array.isArray(project?.documents) ? project.documents : [];
+  if (documents.length === 0) {
+    return null;
+  }
+
+  return documents.find((document) => document.id === project.defaultDocument) || documents[0];
+}
+
+function toCurrentDocument(document) {
+  if (!document) {
+    return null;
+  }
+
   return {
+    id: document.id,
+    title: document.title,
+    manuscriptPath: document.manuscriptPath,
+    storyBiblePath: document.storyBiblePath,
+    notesPath: document.notesPath,
+    revisionPath: document.revisionPath,
+    renderPresets: [...document.renderPresets],
+  };
+}
+
+function attachCurrentDocument(project) {
+  return {
+    ...project,
+    currentDocument: toCurrentDocument(getDefaultDocument(project)),
+  };
+}
+
+export function createDefaultProject(warnings = []) {
+  return attachCurrentDocument({
     schema: PROJECT_SCHEMA,
     title: 'TRURL Local Project',
     defaultDocument: 'main',
@@ -22,7 +54,7 @@ export function createDefaultProject(warnings = []) {
     ],
     source: 'default',
     warnings,
-  };
+  });
 }
 
 function isPlainObject(value) {
@@ -110,7 +142,7 @@ export function validateProjectManifest(manifest) {
 }
 
 function normalizeProjectManifest(manifest, source) {
-  return {
+  return attachCurrentDocument({
     schema: manifest.schema,
     title: manifest.title,
     defaultDocument: manifest.defaultDocument,
@@ -125,7 +157,7 @@ function normalizeProjectManifest(manifest, source) {
     })),
     source,
     warnings: [],
-  };
+  });
 }
 
 export async function loadProject(repoRoot) {

@@ -95,7 +95,7 @@ TRURL can read optional project metadata from `.trurl/project.json`. The current
 }
 ```
 
-Projects without this file still load with the existing one-repository/one-project defaults. The manifest is a backwards-compatible metadata foundation only; multi-project switching UI, databases, and cloud sync are deferred.
+Projects without this file still load with the existing one-repository/one-project defaults. The workspace API includes derived `project.currentDocument` metadata from `defaultDocument`, falling back to the first document when needed. The manifest is a backwards-compatible metadata foundation only; document switching UI, multi-project switching UI, databases, and cloud sync are deferred.
 
 ## Testing
 

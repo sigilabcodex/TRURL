@@ -24,6 +24,7 @@ function renderCount(sectionKey, sections) {
 
 export function WorkspaceSidebar({
   activeSection,
+  currentDocument,
   isEditing,
   project,
   selectedChapter,
@@ -62,6 +63,10 @@ export function WorkspaceSidebar({
 
       <div className="workspace-state">
         <h3>Workspace State</h3>
+        <p><strong>Project:</strong> {project?.title || 'none'}</p>
+        <p><strong>Document:</strong> {currentDocument?.title || 'none'}</p>
+        <p><strong>Manuscript:</strong> {currentDocument?.manuscriptPath || 'manuscript'}</p>
+        <p><strong>Story Bible:</strong> {currentDocument?.storyBiblePath || 'story-bible'}</p>
         <p><strong>Section:</strong> {activeSection}</p>
         <p><strong>Selected:</strong> {selectedChapter?.path || 'none'}</p>
         <p><strong>Local:</strong> repository-backed {isEditing ? 'edit' : 'read'} mode</p>

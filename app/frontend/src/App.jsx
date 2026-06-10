@@ -188,6 +188,7 @@ export function App() {
       <main className={`workspace-grid ${isFocusMode ? 'focus-mode' : ''}`}>
         <WorkspaceSidebar
           activeSection={activeSection}
+          currentDocument={workspace?.project?.currentDocument}
           isEditing={isEditing}
           selectedChapter={selectedChapter}
           project={workspace?.project}
