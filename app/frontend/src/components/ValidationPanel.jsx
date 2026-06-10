@@ -1,11 +1,19 @@
 import React from 'react';
+import { getCheckStatus, summarizeValidation } from '../utils/validationSummary.js';
 
 const validationActions = [
-  { label: 'All Checks', endpoint: '/api/validate/all', primary: true },
+  { label: 'Run All', endpoint: '/api/validate/all', primary: true },
   { label: 'Frontmatter', endpoint: '/api/validate/frontmatter' },
   { label: 'Crossrefs', endpoint: '/api/validate/crossrefs' },
   { label: 'Manuscript Order', endpoint: '/api/validate/manuscript-order' },
 ];
+
+function summarizeOutput(output) {
+  const trimmed = output.trim();
+  if (!trimmed) return '';
+  const firstLine = trimmed.split(/\r?\n/)[0];
+  return firstLine.length > 120 ? `${firstLine.slice(0, 117)}...` : firstLine;
+}
 
 export function ValidationPanel({
   validationError,
@@ -13,6 +21,8 @@ export function ValidationPanel({
   validationState,
   onRunValidation,
 }) {
+  const validationSummary = validationResult ? summarizeValidation(validationResult) : null;
+
   return (
     <section className="validation-panel">
       <div className="render-package-header">
@@ -20,9 +30,9 @@ export function ValidationPanel({
           <h3>Validation</h3>
           <p>Read-only repository health checks.</p>
         </div>
-        {validationResult && (
-          <span className={`status-badge ${validationResult.ok ? 'ok' : 'fail'}`}>
-            {validationResult.ok ? 'ok' : 'fail'}
+        {validationSummary && (
+          <span className={`status-badge ${validationSummary.ok ? 'ok' : 'fail'}`}>
+            {validationSummary.ok ? 'passed' : 'failed'}
           </span>
         )}
       </div>
@@ -41,32 +51,51 @@ export function ValidationPanel({
         ))}
       </div>
 
-      {validationError && <p className="error">Validation failed: {validationError}</p>}
+      {validationError && (
+        <div className="tool-state fail">
+          <strong>Validation failed</strong>
+          <p>{validationError}</p>
+        </div>
+      )}
 
-      {validationResult ? (
+      {validationSummary ? (
         <div className="validation-results">
-          <p className={`validation-overall ${validationResult.ok ? 'ok' : 'fail'}`}>
-            Overall: {validationResult.ok ? 'passed' : 'failed'}
-          </p>
+          <div className={`tool-state ${validationSummary.ok ? 'ok' : 'fail'} validation-summary-card`}>
+            <strong>{validationSummary.ok ? 'Passed' : 'Failed'}</strong>
+            <p>
+              {validationSummary.total} checks, {validationSummary.passed} passed, {' '}
+              {validationSummary.failed} failed.
+            </p>
+          </div>
           <ul>
-            {validationResult.checks.map((check) => (
-              <li key={check.name}>
-                <div className="validation-check-header">
-                  <strong>{check.name}</strong>
-                  <code>exit {check.exitCode}</code>
-                </div>
-                {check.stdout && (
-                  <pre>{check.stdout}</pre>
-                )}
-                {check.stderr && (
-                  <pre className="stderr">{check.stderr}</pre>
-                )}
-              </li>
-            ))}
+            {validationResult.checks.map((check) => {
+              const checkStatus = getCheckStatus(check);
+              const stdoutSummary = summarizeOutput(check.stdout || '');
+              return (
+                <li key={check.name} className="validation-check-card">
+                  <div className="validation-check-header">
+                    <strong>{check.name}</strong>
+                    <span className={`status-badge ${checkStatus === 'pass' ? 'ok' : 'fail'}`}>
+                      {checkStatus}
+                    </span>
+                    <code>exit {check.exitCode}</code>
+                  </div>
+                  {stdoutSummary && <p className="tool-output-summary">{stdoutSummary}</p>}
+                  {check.stderr && <pre className="stderr">{check.stderr}</pre>}
+                  {(check.stdout || check.stderr) && (
+                    <details className="tool-raw-details">
+                      <summary>Raw output</summary>
+                      {check.stdout && <pre>{check.stdout}</pre>}
+                      {check.stderr && <pre className="stderr">{check.stderr}</pre>}
+                    </details>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : (
-        <p className="package-empty">Run checks manually before edits or exports.</p>
+        <p className="package-empty">Run checks before editing or exporting.</p>
       )}
     </section>
   );

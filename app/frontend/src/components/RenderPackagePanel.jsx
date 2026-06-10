@@ -1,17 +1,5 @@
 import React from 'react';
-
-function countLinkedEntities(packagePayload) {
-  const linkedEntities = packagePayload?.package?.storyBible?.linkedEntities;
-  if (!linkedEntities) {
-    return { characters: 0, locations: 0, timeline: 0 };
-  }
-
-  return {
-    characters: linkedEntities.characters?.length || 0,
-    locations: linkedEntities.locations?.length || 0,
-    timeline: linkedEntities.timeline?.length || 0,
-  };
-}
+import { summarizeRenderPackage } from '../utils/renderPackageSummary.js';
 
 export function RenderPackagePanel({
   documentPackage,
@@ -24,14 +12,14 @@ export function RenderPackagePanel({
   onOutputTargetChange,
   onStylePresetChange,
 }) {
-  const packageEntityCounts = countLinkedEntities(documentPackage);
+  const packageSummary = summarizeRenderPackage(documentPackage);
 
   return (
     <section className="render-package">
       <div className="render-package-header">
         <div>
           <h3>Render Package</h3>
-          <p>Mock TRURL package preview. No OSER render.</p>
+          <p>Mock TRURL package preview. No OSER render and no export files written.</p>
         </div>
         <span className="mock-badge">mock</span>
       </div>
@@ -73,33 +61,38 @@ export function RenderPackagePanel({
         </button>
       </div>
 
-      {packageError && <p className="error">Package failed: {packageError}</p>}
+      {packageError && (
+        <div className="tool-state fail">
+          <strong>Package failed</strong>
+          <p>{packageError}</p>
+        </div>
+      )}
 
-      {documentPackage ? (
+      {packageSummary ? (
         <div className="package-summary">
+          <div className="tool-state ok">
+            <strong>Package built</strong>
+            <p>Mock document package is ready for inspection. No export files were written.</p>
+          </div>
           <dl>
-            <dt>Schema</dt>
-            <dd>{documentPackage.package.schema}</dd>
-            <dt>Mode</dt>
-            <dd>{documentPackage.mode}</dd>
-            <dt>Target</dt>
-            <dd>{documentPackage.package.output.target}</dd>
-            <dt>Output path</dt>
-            <dd><code>{documentPackage.package.output.path}</code></dd>
-            <dt>Selected</dt>
-            <dd>{documentPackage.package.manuscript.selected.title}</dd>
+            <dt>Chapter</dt>
+            <dd>{packageSummary.selectedTitle}</dd>
             <dt>Source path</dt>
-            <dd><code>{documentPackage.package.manuscript.selected.path}</code></dd>
-            <dt>Entities</dt>
-            <dd>
-              {packageEntityCounts.characters} characters, {' '}
-              {packageEntityCounts.locations} locations, {' '}
-              {packageEntityCounts.timeline} timeline
-            </dd>
+            <dd><code>{packageSummary.selectedPath}</code></dd>
+            <dt>Target</dt>
+            <dd>{packageSummary.target}</dd>
+            <dt>Output path</dt>
+            <dd><code>{packageSummary.outputPath}</code></dd>
             <dt>Style preset</dt>
-            <dd>{documentPackage.package.style.preset}</dd>
+            <dd>{packageSummary.stylePreset}</dd>
+            <dt>Linked entities</dt>
+            <dd>
+              {packageSummary.linkedEntities.characters} characters, {' '}
+              {packageSummary.linkedEntities.locations} locations, {' '}
+              {packageSummary.linkedEntities.timeline} timeline
+            </dd>
             <dt>Warnings</dt>
-            <dd>{documentPackage.warnings.length ? documentPackage.warnings.join(', ') : 'none'}</dd>
+            <dd>{packageSummary.warningsCount}</dd>
           </dl>
 
           <details>
@@ -110,9 +103,7 @@ export function RenderPackagePanel({
           </details>
         </div>
       ) : (
-        <p className="package-empty">
-          {selectedChapter ? `Ready for ${selectedChapter.path}` : 'Select a chapter first.'}
-        </p>
+        <p className="package-empty">Select a chapter and build a mock document package.</p>
       )}
     </section>
   );

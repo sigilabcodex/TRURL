@@ -37,6 +37,8 @@ The top transport bar is the command surface for global workspace controls. It s
 
 The right panel is now a contextual inspector only: selected chapter metadata, linked characters, linked locations, and timeline signals. Render, Validation, and Git keep using the same frontend calls and backend endpoints, but they no longer compete with story-bible context in the right rail.
 
+Render, Validation, and Git are global workflow tools in the transport drawer. Render currently builds a mock document package summary only and remains a placeholder until real OSER integration. Validation presents pass/fail rollups for the existing checks. Git remains strictly read-only: it parses status output and keeps raw status/diff details available without commit, push, revert, branch, merge, or other write actions.
+
 This reorganization is frontend-only. It does not change API behavior, save behavior, project manifests, repository files, or backend state.
 
 ## Editor Quality-of-Life Features
@@ -65,7 +67,7 @@ Theme selection is stored in browser `localStorage` under `trurl.theme`. Themes 
 - safe authoring preview for simple Markdown structures; this is not the final OSER publishing render
 - Focus Mode that hides side/context panels with CSS while keeping the same workspace state
 - local theme selection in the transport bar for comfortable reading and writing palettes
-- transport-controlled workspace tools drawer for Render, Validation, and Git
+- transport-controlled workspace tools drawer for Render, Validation, and Git workflow panels
 - contextual inspector for linked story-bible data and selected chapter metadata
 - save action for manuscript body text through backend write endpoint
 - clearer saved/saving/unsaved state indicator while editing
@@ -73,11 +75,11 @@ Theme selection is stored in browser `localStorage` under `trurl.theme`. Themes 
 - repository section counts for manuscript/story bible/notes/revision
 - workspace state indicator with selected chapter path
 - manual `POST /api/render/document-package` request for the selected chapter
-- compact render package summary and scrollable JSON preview
+- mock render package workflow summary with collapsed JSON preview
 - manual validation requests for frontmatter, crossrefs, manuscript order, or all checks
-- compact validation status/output display
+- validation pass/fail summary with compact check cards
 - manual `GET /api/git/status` and `GET /api/git/diff` requests
-- compact read-only Git output display
+- parsed read-only Git status summary with collapsed raw status and diff output
 
 ## What is Still Mocked / Deferred
 

@@ -1,4 +1,13 @@
 import React from 'react';
+import { summarizeGitStatus } from '../utils/gitStatus.js';
+
+function labelForType(type) {
+  if (type === 'untracked') return 'Untracked';
+  if (type === 'modified') return 'Modified';
+  if (type === 'added') return 'Added';
+  if (type === 'deleted') return 'Deleted';
+  return 'Changed';
+}
 
 export function GitPanel({
   gitDiff,
@@ -7,12 +16,14 @@ export function GitPanel({
   gitStatus,
   onGitRequest,
 }) {
+  const statusSummary = gitStatus ? summarizeGitStatus(gitStatus) : null;
+
   return (
     <section className="git-panel">
       <div className="render-package-header">
         <div>
           <h3>Git</h3>
-          <p>Read-only status and diff visibility.</p>
+          <p>Read-only status and diff visibility. No commit, push, or revert actions.</p>
         </div>
         <span className="mock-badge">read</span>
       </div>
@@ -34,19 +45,39 @@ export function GitPanel({
         </button>
       </div>
 
-      {gitError && <p className="error">Git request failed: {gitError}</p>}
+      {gitError && (
+        <div className="tool-state fail">
+          <strong>Git request failed</strong>
+          <p>{gitError}</p>
+        </div>
+      )}
 
-      {gitStatus ? (
-        <div className="git-output">
-          <div className="validation-check-header">
-            <strong>Status</strong>
-            <code>{gitStatus.ok ? 'ok' : 'fail'}</code>
+      {statusSummary ? (
+        <div className="git-workflow-summary">
+          <div className={`tool-state ${statusSummary.isClean ? 'ok' : 'warn'}`}>
+            <strong>{statusSummary.isClean ? 'Working tree clean' : 'Working tree has changes'}</strong>
+            <p>
+              Branch: {statusSummary.branch}. Changed files: {statusSummary.changedFiles.length}.
+            </p>
           </div>
-          {gitStatus.commands.map((command) => (
-            <pre key={command.name}>
-              {command.stdout || command.stderr || '(no output)'}
-            </pre>
-          ))}
+
+          {!statusSummary.isClean && (
+            <ul className="git-file-list">
+              {statusSummary.changedFiles.map((file) => (
+                <li key={`${file.status}-${file.path}`}>
+                  <span className={`status-badge ${file.type === 'untracked' ? 'fail' : 'ok'}`}>
+                    {labelForType(file.type)}
+                  </span>
+                  <code>{file.path}</code>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <details className="tool-raw-details">
+            <summary>Raw status output</summary>
+            <pre>{statusSummary.rawOutput || '(no output)'}</pre>
+          </details>
         </div>
       ) : (
         <p className="package-empty">Refresh status to inspect branch and working tree state.</p>

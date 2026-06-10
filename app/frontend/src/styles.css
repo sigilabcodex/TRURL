@@ -1590,3 +1590,155 @@ input:focus-visible {
     width: 100%;
   }
 }
+
+/* Tool workflow panels: summarize first, keep raw output secondary. */
+.tool-state {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.65rem 0;
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  background: var(--surface-raised);
+}
+
+.tool-state strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.tool-state p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.tool-state.ok {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.tool-state.fail {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.tool-state.warn {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.package-summary dl {
+  grid-template-columns: 110px minmax(0, 1fr);
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  padding: 0.65rem;
+  background: var(--surface-raised);
+}
+
+.validation-summary-card {
+  margin-bottom: 0.75rem;
+}
+
+.validation-check-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.validation-check-header {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) auto auto;
+}
+
+.tool-output-summary {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.tool-raw-details {
+  margin-top: 0.25rem;
+}
+
+.tool-raw-details summary {
+  cursor: pointer;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.tool-raw-details pre {
+  max-height: 180px;
+  margin: 0.4rem 0 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.5rem;
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.42;
+  white-space: pre-wrap;
+}
+
+.tool-raw-details pre.stderr,
+.validation-check-card pre.stderr {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.validation-check-card > pre.stderr {
+  max-height: 140px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--danger);
+  border-radius: 7px;
+  padding: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.42;
+  white-space: pre-wrap;
+}
+
+.git-workflow-summary {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.git-file-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.git-file-list li {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: var(--surface-raised);
+}
+
+.git-file-list code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-soft);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 700px) {
+  .validation-check-header,
+  .git-file-list li {
+    grid-template-columns: 1fr;
+  }
+}
