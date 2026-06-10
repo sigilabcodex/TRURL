@@ -15,6 +15,7 @@ TRURL currently has a working local alpha foundation:
 - Optional `.trurl/project.json` project manifest foundation.
 - `project.currentDocument` metadata exposed by `GET /api/workspace`.
 - Read-only document selector groundwork in the transport bar; real switching remains deferred.
+- Read-only manuscript outliner groundwork for planning and chapter scanning.
 - Mock render package preview for the future TRURL to OSER boundary.
 - Validation panel for frontmatter, cross-reference, and manuscript-order checks.
 - Read-only Git status and scoped diff visibility.
@@ -151,7 +152,7 @@ TRURL's direction should remain distinct:
 #### P1 / Near-Term
 
 - Document selector.
-- Outliner view.
+- Read-only Outliner view.
 - Card/corkboard view for chapters.
 - Chapter/scene metadata editor.
 - Writing targets and progress.
@@ -293,9 +294,11 @@ Verification checklist:
 - Workspace loads with and without a manifest.
 - UI clearly marks the current document.
 
-### D. Add Outliner View
+### D. Read-Only Outliner View
 
-Goal: Add a structural view of manuscript chapters with order, title, status, path, and linked canon counts.
+Status: Implemented as frontend groundwork. Reordering, drag-and-drop, and metadata editing remain deferred.
+
+Goal: Maintain a structural view of manuscript chapters with order, title, status, path, and linked canon counts.
 
 Files likely touched:
 

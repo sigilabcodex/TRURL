@@ -1530,6 +1530,39 @@ input:focus-visible {
   font-weight: 600;
 }
 
+.transport-view-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.18rem;
+  background: var(--surface);
+}
+
+.transport-view-toggle button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.transport-view-toggle button:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.transport-view-toggle button.active {
+  background: var(--text);
+  color: var(--surface);
+}
+
 .transport-tool-tabs {
   display: inline-grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1681,8 +1714,204 @@ input:focus-visible {
 
   .transport-theme,
   .focus-toggle,
+  .transport-view-toggle,
   .transport-tool-tabs {
     width: 100%;
+  }
+}
+
+
+/* Outliner: read-only manuscript planning view. */
+.outliner-view {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.outliner-header {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.outliner-header h2 {
+  margin-bottom: 0.2rem;
+}
+
+.outliner-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.outliner-header button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.35rem 0.65rem;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.outliner-header button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
+}
+
+.outliner-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.outliner-summary > div {
+  display: grid;
+  gap: 0.12rem;
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  background: var(--surface-raised);
+}
+
+.outliner-summary span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.outliner-summary strong {
+  color: var(--text);
+  font-size: 1.12rem;
+}
+
+.outliner-table-wrap {
+  min-width: 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.outliner-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.outliner-table th,
+.outliner-table td {
+  border-bottom: 1px solid var(--border-muted);
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.outliner-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.outliner-table tbody tr {
+  cursor: pointer;
+}
+
+.outliner-table tbody tr:hover {
+  background: var(--surface-raised);
+}
+
+.outliner-table tbody tr.selected {
+  background: var(--accent-soft);
+}
+
+.outliner-table small,
+.outliner-table code {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.outliner-row-button {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+}
+
+.outliner-row-button:hover {
+  color: var(--accent);
+}
+
+.outliner-pill {
+  display: inline-block;
+  border: 1px solid var(--border-muted);
+  border-radius: 999px;
+  padding: 0.12rem 0.42rem;
+  background: var(--surface-muted);
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.outliner-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.outliner-counts span {
+  border: 1px solid var(--border-muted);
+  border-radius: 999px;
+  padding: 0.1rem 0.35rem;
+  background: var(--surface-raised);
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .outliner-header {
+    display: grid;
+  }
+
+  .outliner-header button {
+    width: 100%;
+  }
+
+  .outliner-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .outliner-summary {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -21,6 +21,7 @@ This pass upgrades the frontend from mocked data to a local repository viewer an
 4. Frontend renders:
    - transport bar with project/read-only document selector/chapter context, save state, Focus, Theme, and global tool toggles
    - real chapter list
+   - read-only Outliner view for manuscript planning
    - selected chapter body
    - body-only authoring stats, read/edit/preview modes, and focus mode
    - source-only Markdown formatting helpers in edit mode
@@ -36,6 +37,8 @@ This pass upgrades the frontend from mocked data to a local repository viewer an
 The top transport bar is the command surface for global workspace controls. It shows project, a read-only current document selector, selected chapter, save state, Focus, Theme, and toggles for Render, Validation, and Git. Those tool toggles open one workspace tools drawer below the transport bar.
 
 The document selector previews the future multi-document workflow from `project.documents`. It is intentionally disabled: changing documents does not update frontend state, backend state, loaded manuscript/story-bible/notes/revision folders, or save behavior. The selector exposes compact current-document metadata so manifest data is visible before real switching is implemented.
+
+The Write/Outliner toggle switches between the source editor and a read-only manuscript outliner inspired by longform writing tools such as Scrivener and Manuskript. The outliner summarizes chapters, approximate words, status, source/canon signals, paths, and linked context counts from the already loaded workspace data. Selecting a row only selects the chapter; it does not edit, reorder, save, or call a backend endpoint.
 
 The right panel is now a contextual inspector only: selected chapter metadata, linked characters, linked locations, and timeline signals. Render, Validation, and Git keep using the same frontend calls and backend endpoints, but they no longer compete with story-bible context in the right rail.
 
@@ -70,6 +73,7 @@ Theme selection is stored in browser `localStorage` under `trurl.theme`. Themes 
 - Focus Mode that hides side/context panels with CSS while keeping the same workspace state
 - local theme selection in the transport bar for comfortable reading and writing palettes
 - transport-controlled read-only document selector with current manifest metadata
+- read-only manuscript Outliner view with summary cards and selectable chapter rows
 - transport-controlled workspace tools drawer for Render, Validation, and Git workflow panels
 - contextual inspector for linked story-bible data and selected chapter metadata
 - save action for manuscript body text through backend write endpoint
@@ -91,6 +95,7 @@ Theme selection is stored in browser `localStorage` under `trurl.theme`. Themes 
 - no HTML/PDF/EPUB generation from the frontend
 - no cloud sync/auth/multi-user features
 - no real document switching; the selector is read-only and the repository still loads the default document folders
+- no outliner drag-and-drop, reordering, metadata editing, or file writes
 - no frontmatter editing in UI (body-only editing in this pass)
 - no rich text editor dependency, WYSIWYG editing, or custom undo system
 - no final publishing preview in the editor; OSER output remains separate from this authoring preview

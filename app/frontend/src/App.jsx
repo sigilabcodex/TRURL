@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ContextPanel } from './components/ContextPanel.jsx';
 import { EditorPanel } from './components/EditorPanel.jsx';
 import { GitPanel } from './components/GitPanel.jsx';
+import { OutlinerView } from './components/OutlinerView.jsx';
 import { RenderPackagePanel } from './components/RenderPackagePanel.jsx';
 import { TransportBar } from './components/TransportBar.jsx';
 import { ValidationPanel } from './components/ValidationPanel.jsx';
@@ -28,6 +29,7 @@ export function App() {
   const [workspace, setWorkspace] = useState(null);
   const [themeId, setThemeId] = useState(getInitialThemeId);
   const [activeTool, setActiveTool] = useState(null);
+  const [activeView, setActiveView] = useState('write');
   const [activeSection, setActiveSection] = useState('Manuscript');
   const [selectedChapterId, setSelectedChapterId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -217,6 +219,7 @@ export function App() {
 
       <TransportBar
         activeTool={activeTool}
+        activeView={activeView}
         isDirty={isDirty}
         isFocusMode={isFocusMode}
         project={workspace?.project}
@@ -226,6 +229,7 @@ export function App() {
         themes={THEMES}
         onFocusModeChange={setIsFocusMode}
         onThemeChange={setThemeId}
+        onViewChange={setActiveView}
         onToolChange={(toolId) => setActiveTool((currentToolId) => toggleWorkspaceTool(currentToolId, toolId))}
       />
 
@@ -276,20 +280,29 @@ export function App() {
           sections={workspace?.sections}
           onActiveSectionChange={setActiveSection}
         />
-        <EditorPanel
-          editorBody={editorBody}
-          error={error}
-          isDirty={isDirty}
-          isEditing={isEditing}
-          saveState={saveState}
-          selectedChapter={selectedChapter}
-          selectedChapterId={selectedChapterId}
-          workspace={workspace}
-          onEditorBodyChange={setEditorBody}
-          onSave={handleSave}
-          onSelectedChapterChange={setSelectedChapterId}
-          onToggleEditing={() => setIsEditing((value) => !value)}
-        />
+        {activeView === 'outliner' ? (
+          <OutlinerView
+            chapters={workspace?.chapters || []}
+            selectedChapterId={selectedChapterId}
+            onSelectedChapterChange={setSelectedChapterId}
+            onViewChange={setActiveView}
+          />
+        ) : (
+          <EditorPanel
+            editorBody={editorBody}
+            error={error}
+            isDirty={isDirty}
+            isEditing={isEditing}
+            saveState={saveState}
+            selectedChapter={selectedChapter}
+            selectedChapterId={selectedChapterId}
+            workspace={workspace}
+            onEditorBodyChange={setEditorBody}
+            onSave={handleSave}
+            onSelectedChapterChange={setSelectedChapterId}
+            onToggleEditing={() => setIsEditing((value) => !value)}
+          />
+        )}
         <ContextPanel
           linked={linked}
           selectedChapter={selectedChapter}

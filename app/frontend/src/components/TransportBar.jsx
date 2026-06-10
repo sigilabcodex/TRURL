@@ -11,6 +11,7 @@ function getSaveLabel({ isDirty, saveState }) {
 
 export function TransportBar({
   activeTool,
+  activeView,
   isDirty,
   isFocusMode,
   project,
@@ -20,6 +21,7 @@ export function TransportBar({
   themes,
   onFocusModeChange,
   onThemeChange,
+  onViewChange,
   onToolChange,
 }) {
   const saveLabel = getSaveLabel({ isDirty, saveState });
@@ -44,6 +46,24 @@ export function TransportBar({
       </div>
 
       <div className="transport-actions">
+        {!isFocusMode && (
+          <div className="transport-view-toggle" aria-label="Workspace view">
+            <button
+              className={activeView === 'write' ? 'active' : ''}
+              type="button"
+              onClick={() => onViewChange('write')}
+            >
+              Write
+            </button>
+            <button
+              className={activeView === 'outliner' ? 'active' : ''}
+              type="button"
+              onClick={() => onViewChange('outliner')}
+            >
+              Outliner
+            </button>
+          </div>
+        )}
         <label className="transport-theme">
           <span>Theme</span>
           <select
