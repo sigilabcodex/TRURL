@@ -96,7 +96,9 @@ TRURL can read optional project metadata from `.trurl/project.json`. The current
 }
 ```
 
-Projects without this file still load with the existing one-repository/one-project defaults. The workspace API includes derived `project.currentDocument` metadata from `defaultDocument`, falling back to the first document when needed. The manifest is a backwards-compatible metadata foundation only; document switching UI, multi-project switching UI, databases, and cloud sync are deferred.
+The formal schema lives at `schema/trurl-project.schema.json`. It keeps required v0 fields explicit while allowing additional properties for forward compatibility as the manifest evolves.
+
+Projects without this file still load with the existing one-repository/one-project defaults. When a manifest is missing or structurally invalid, TRURL falls back to the safe default project and includes simple `project.warnings` and `project.errors` arrays in the workspace payload. Recoverable issues, such as a `defaultDocument` that does not match any document id, keep the manifest loaded and derive `project.currentDocument` from the first document. The manifest is a backwards-compatible metadata foundation only; document switching UI, alternate folder loading, multi-project switching UI, databases, and cloud sync are deferred.
 
 ## Testing
 

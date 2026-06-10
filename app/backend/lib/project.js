@@ -36,7 +36,7 @@ function attachCurrentDocument(project) {
   };
 }
 
-export function createDefaultProject(warnings = []) {
+export function createDefaultProject(warnings = [], errors = []) {
   return attachCurrentDocument({
     schema: PROJECT_SCHEMA,
     title: 'TRURL Local Project',
@@ -54,6 +54,7 @@ export function createDefaultProject(warnings = []) {
     ],
     source: 'default',
     warnings,
+    errors,
   });
 }
 
@@ -76,10 +77,11 @@ function isRelativeSafePath(value) {
 
 function validateDocument(document, index) {
   const prefix = `documents[${index}]`;
+  const warnings = [];
   const errors = [];
 
   if (!isPlainObject(document)) {
-    return [`${prefix} must be an object.`];
+    return { warnings, errors: [`${prefix} must be an object.`] };
   }
 
   for (const key of ['id', 'title', 'manuscriptPath', 'storyBiblePath', 'notesPath', 'revisionPath']) {
@@ -94,19 +96,22 @@ function validateDocument(document, index) {
     }
   }
 
-  if (!Array.isArray(document.renderPresets)
+  if (document.renderPresets === undefined) {
+    warnings.push(`${prefix}.renderPresets is missing; using an empty array.`);
+  } else if (!Array.isArray(document.renderPresets)
     || document.renderPresets.some((preset) => typeof preset !== 'string' || preset.trim() === '')) {
     errors.push(`${prefix}.renderPresets must be an array of non-empty strings.`);
   }
 
-  return errors;
+  return { warnings, errors };
 }
 
 export function validateProjectManifest(manifest) {
+  const warnings = [];
   const errors = [];
 
   if (!isPlainObject(manifest)) {
-    return ['Project manifest must be a JSON object.'];
+    return { ok: false, warnings, errors: ['Project manifest must be a JSON object.'] };
   }
 
   if (manifest.schema !== PROJECT_SCHEMA) {
@@ -125,23 +130,37 @@ export function validateProjectManifest(manifest) {
     errors.push('documents must be a non-empty array.');
   } else {
     manifest.documents.forEach((document, index) => {
-      errors.push(...validateDocument(document, index));
+      const result = validateDocument(document, index);
+      warnings.push(...result.warnings);
+      errors.push(...result.errors);
     });
 
-    const documentIds = new Set(
-      manifest.documents
-        .filter((document) => isPlainObject(document) && typeof document.id === 'string')
-        .map((document) => document.id),
-    );
+    const documentIds = new Set();
+    const duplicateIds = new Set();
+    manifest.documents.forEach((document) => {
+      if (!isPlainObject(document) || typeof document.id !== 'string' || document.id.trim() === '') {
+        return;
+      }
+
+      if (documentIds.has(document.id)) {
+        duplicateIds.add(document.id);
+      }
+      documentIds.add(document.id);
+    });
+
+    duplicateIds.forEach((id) => {
+      errors.push(`document id "${id}" must be unique.`);
+    });
+
     if (typeof manifest.defaultDocument === 'string' && !documentIds.has(manifest.defaultDocument)) {
-      errors.push('defaultDocument must match a document id.');
+      warnings.push('defaultDocument does not match a document id; using the first document.');
     }
   }
 
-  return errors;
+  return { ok: errors.length === 0, warnings, errors };
 }
 
-function normalizeProjectManifest(manifest, source) {
+function normalizeProjectManifest(manifest, source, warnings = []) {
   return attachCurrentDocument({
     schema: manifest.schema,
     title: manifest.title,
@@ -153,10 +172,11 @@ function normalizeProjectManifest(manifest, source) {
       storyBiblePath: document.storyBiblePath,
       notesPath: document.notesPath,
       revisionPath: document.revisionPath,
-      renderPresets: [...document.renderPresets],
+      renderPresets: Array.isArray(document.renderPresets) ? [...document.renderPresets] : [],
     })),
     source,
-    warnings: [],
+    warnings,
+    errors: [],
   });
 }
 
@@ -169,20 +189,23 @@ export async function loadProject(repoRoot) {
     try {
       manifest = JSON.parse(raw);
     } catch (error) {
-      return createDefaultProject([`Invalid project manifest JSON: ${error.message}`]);
+      return createDefaultProject(['Invalid project manifest JSON; using defaults.'], [error.message]);
     }
 
-    const errors = validateProjectManifest(manifest);
-    if (errors.length > 0) {
-      return createDefaultProject(errors.map((error) => `Invalid project manifest: ${error}`));
+    const validation = validateProjectManifest(manifest);
+    if (!validation.ok) {
+      return createDefaultProject(
+        ['Invalid project manifest; using defaults.', ...validation.warnings],
+        validation.errors,
+      );
     }
 
-    return normalizeProjectManifest(manifest, PROJECT_MANIFEST_PATH.replace(/\\/g, '/'));
+    return normalizeProjectManifest(manifest, PROJECT_MANIFEST_PATH.replace(/\\/g, '/'), validation.warnings);
   } catch (error) {
     if (error.code === 'ENOENT') {
       return createDefaultProject();
     }
 
-    return createDefaultProject([`Unable to read project manifest: ${error.message}`]);
+    return createDefaultProject(['Unable to read project manifest; using defaults.'], [error.message]);
   }
 }

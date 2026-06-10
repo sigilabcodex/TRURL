@@ -48,7 +48,7 @@ TRURL is not yet:
 - Stabilize editor UX: keep Read/Edit/Preview and Focus Mode predictable, comfortable, and source-oriented.
 - Preserve the safe save model: body-only manuscript writes, frontmatter preservation, path validation, and explicit user action.
 - Keep tests passing: `npm run check` remains the baseline before commits.
-- Add project manifest validation/schema: formalize `.trurl/project.json` without forcing existing projects to adopt it immediately.
+- Project manifest validation/schema foundation is in place: keep it backwards-compatible while future document switching remains deferred.
 - Improve document metadata display: show current document context clearly without implementing switching yet.
 
 ### P1
@@ -239,9 +239,11 @@ Verification checklist:
 - README links to the roadmap.
 - Roadmap renders as readable Markdown.
 
-### B. Add Project Manifest JSON Schema
+### B. Project Manifest JSON Schema Foundation
 
-Goal: Add a formal schema for `.trurl/project.json` and test the current manifest against it.
+Status: Implemented as a foundation pass. Keep future changes focused on schema evolution and validation refinements before document switching.
+
+Goal: Maintain the formal schema for `.trurl/project.json` and test the current manifest against it.
 
 Files likely touched:
 
