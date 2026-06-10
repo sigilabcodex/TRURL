@@ -36,6 +36,12 @@ export function RenderPackagePanel({
         <span className="mock-badge">mock</span>
       </div>
 
+      <div className="package-status" aria-label="Render package status">
+        <span>Mock package only</span>
+        <span>{selectedChapter ? selectedChapter.path : 'No chapter selected'}</span>
+        <span>Target: {outputTarget}</span>
+      </div>
+
       <div className="package-controls">
         <label>
           <span>Style preset</span>

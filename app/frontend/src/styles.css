@@ -1295,15 +1295,18 @@ h3 {
 }
 
 .theme-selector select,
+.transport-theme select,
 .package-controls input,
 .package-controls select {
   color-scheme: light;
 }
 
 .app-shell[data-theme="dark"] .theme-selector select,
+.app-shell[data-theme="dark"] .transport-theme select,
 .app-shell[data-theme="dark"] .package-controls input,
 .app-shell[data-theme="dark"] .package-controls select,
 .app-shell[data-theme="midnight"] .theme-selector select,
+.app-shell[data-theme="midnight"] .transport-theme select,
 .app-shell[data-theme="midnight"] .package-controls input,
 .app-shell[data-theme="midnight"] .package-controls select {
   color-scheme: dark;
@@ -1327,4 +1330,263 @@ select:focus-visible,
 input:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* Transport bar: global workspace commands above the writing grid. */
+.transport-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  max-width: 1840px;
+  margin: 0 auto;
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+
+.transport-context {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(150px, 0.8fr) minmax(220px, 1.6fr) minmax(82px, max-content);
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.transport-context > div {
+  min-width: 0;
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  background: var(--surface);
+}
+
+.transport-label,
+.transport-theme span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.transport-context strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.83rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transport-chapter code {
+  display: block;
+  margin-top: 0.15rem;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transport-save.dirty {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.transport-save.saving {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.transport-save.saved {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.transport-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: end;
+  justify-content: flex-end;
+}
+
+.transport-theme {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 150px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.transport-theme select {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.3rem 0.45rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+}
+
+.transport-tool-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.18rem;
+  background: var(--surface);
+}
+
+.transport-tool-tabs button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.transport-tool-tabs button:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.transport-tool-tabs button.active {
+  background: var(--text);
+  color: var(--surface);
+}
+
+.workspace-tools-drawer {
+  max-width: 1840px;
+  margin: 0 auto;
+  padding: 0.65rem 0.7rem 0;
+}
+
+.workspace-tools-drawer.focus-mode {
+  max-width: 1240px;
+}
+
+.workspace-tools-shell {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem;
+  background: var(--surface);
+  box-shadow: 0 10px 28px var(--shadow);
+}
+
+.workspace-tools-shell .render-package,
+.workspace-tools-shell .validation-panel,
+.workspace-tools-shell .git-panel {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.workspace-tools-shell .package-controls,
+.workspace-tools-shell .validation-controls,
+.workspace-tools-shell .git-controls {
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  align-items: end;
+}
+
+.workspace-tools-shell .validation-controls {
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+}
+
+.workspace-tools-shell .validation-controls button.primary {
+  grid-column: auto;
+}
+
+.package-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.65rem 0 0;
+}
+
+.package-status span {
+  min-width: 0;
+  border: 1px solid var(--border-muted);
+  border-radius: 999px;
+  padding: 0.16rem 0.5rem;
+  background: var(--surface-muted);
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.chapter-inspector dl {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 0.35rem 0.5rem;
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.chapter-inspector dt {
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.chapter-inspector dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.chapter-inspector code {
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+@media (max-width: 1320px) {
+  .transport-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .transport-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .transport-context {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .transport-chapter,
+  .transport-save {
+    grid-column: 1 / -1;
+  }
+
+  .workspace-tools-shell .package-controls,
+  .workspace-tools-shell .validation-controls,
+  .workspace-tools-shell .git-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .transport-context,
+  .transport-tool-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .transport-theme,
+  .focus-toggle,
+  .transport-tool-tabs {
+    width: 100%;
+  }
 }

@@ -19,14 +19,25 @@ This pass upgrades the frontend from mocked data to a local repository viewer an
 2. Backend parses YAML frontmatter + Markdown body.
 3. Frontend requests `GET /api/workspace`.
 4. Frontend renders:
+   - transport bar with project/document/chapter context, save state, Focus, Theme, and global tool toggles
    - real chapter list
    - selected chapter body
    - body-only authoring stats, read/edit/preview modes, and focus mode
    - source-only Markdown formatting helpers in edit mode
-   - context panel resolved from `character_ids`, `location_ids`, `timeline_ids`
+   - contextual inspector resolved from `character_ids`, `location_ids`, `timeline_ids`
+   - workspace tools drawer for render package, validation, and Git panels
    - read-only mock render package preview for the selected chapter
    - read-only validation controls for repository health checks
    - read-only Git status and diff visibility
+
+
+## Workspace Organization
+
+The top transport bar is the command surface for global workspace controls. It shows project, current document, selected chapter, save state, Focus, Theme, and toggles for Render, Validation, and Git. Those tool toggles open one workspace tools drawer below the transport bar.
+
+The right panel is now a contextual inspector only: selected chapter metadata, linked characters, linked locations, and timeline signals. Render, Validation, and Git keep using the same frontend calls and backend endpoints, but they no longer compete with story-bible context in the right rail.
+
+This reorganization is frontend-only. It does not change API behavior, save behavior, project manifests, repository files, or backend state.
 
 ## Editor Quality-of-Life Features
 
@@ -53,7 +64,9 @@ Theme selection is stored in browser `localStorage` under `trurl.theme`. Themes 
 - body-only editor toolbar with selected path, word count, character count, estimated reading time, and mode
 - safe authoring preview for simple Markdown structures; this is not the final OSER publishing render
 - Focus Mode that hides side/context panels with CSS while keeping the same workspace state
-- local theme selection for comfortable reading and writing palettes
+- local theme selection in the transport bar for comfortable reading and writing palettes
+- transport-controlled workspace tools drawer for Render, Validation, and Git
+- contextual inspector for linked story-bible data and selected chapter metadata
 - save action for manuscript body text through backend write endpoint
 - clearer saved/saving/unsaved state indicator while editing
 - real context resolution against story-bible IDs

@@ -1,33 +1,27 @@
 import React from 'react';
 
-import { GitPanel } from './GitPanel.jsx';
-import { RenderPackagePanel } from './RenderPackagePanel.jsx';
-import { ValidationPanel } from './ValidationPanel.jsx';
-
 export function ContextPanel({
-  documentPackage,
-  gitDiff,
-  gitError,
-  gitState,
-  gitStatus,
   linked,
-  outputTarget,
-  packageError,
-  packageState,
   selectedChapter,
-  stylePreset,
-  validationError,
-  validationResult,
-  validationState,
-  onBuildPackage,
-  onGitRequest,
-  onOutputTargetChange,
-  onRunValidation,
-  onStylePresetChange,
 }) {
   return (
     <aside className="panel metadata">
-      <h2>Context</h2>
+      <h2>Inspector</h2>
+      {selectedChapter && (
+        <section className="chapter-inspector">
+          <h3>Selected Chapter</h3>
+          <dl>
+            <dt>Title</dt>
+            <dd>{selectedChapter.title}</dd>
+            <dt>Path</dt>
+            <dd><code>{selectedChapter.path}</code></dd>
+            <dt>Status</dt>
+            <dd>{selectedChapter.status}</dd>
+            <dt>Type</dt>
+            <dd>{selectedChapter.type}</dd>
+          </dl>
+        </section>
+      )}
       <section>
         <h3>Linked Characters</h3>
         <ul>
@@ -66,30 +60,6 @@ export function ContextPanel({
           ))}
         </ul>
       </section>
-      <RenderPackagePanel
-        documentPackage={documentPackage}
-        outputTarget={outputTarget}
-        packageError={packageError}
-        packageState={packageState}
-        selectedChapter={selectedChapter}
-        stylePreset={stylePreset}
-        onBuildPackage={onBuildPackage}
-        onOutputTargetChange={onOutputTargetChange}
-        onStylePresetChange={onStylePresetChange}
-      />
-      <ValidationPanel
-        validationError={validationError}
-        validationResult={validationResult}
-        validationState={validationState}
-        onRunValidation={onRunValidation}
-      />
-      <GitPanel
-        gitDiff={gitDiff}
-        gitError={gitError}
-        gitState={gitState}
-        gitStatus={gitStatus}
-        onGitRequest={onGitRequest}
-      />
     </aside>
   );
 }

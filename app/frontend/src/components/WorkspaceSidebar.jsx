@@ -29,10 +29,7 @@ export function WorkspaceSidebar({
   project,
   selectedChapter,
   sections,
-  themeId,
-  themes,
   onActiveSectionChange,
-  onThemeChange,
 }) {
   return (
     <aside className="panel sidebar">
@@ -73,19 +70,6 @@ export function WorkspaceSidebar({
         <p><strong>Section:</strong> {activeSection}</p>
         <p><strong>Selected:</strong> {selectedChapter?.path || 'none'}</p>
         <p><strong>Local:</strong> repository-backed {isEditing ? 'edit' : 'read'} mode</p>
-        <label className="theme-selector">
-          <span>Theme</span>
-          <select
-            value={themeId}
-            onChange={(event) => onThemeChange(event.target.value)}
-          >
-            {themes.map((theme) => (
-              <option key={theme.id} value={theme.id}>
-                {theme.label}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
     </aside>
   );

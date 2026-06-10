@@ -1,9 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ContextPanel } from './components/ContextPanel.jsx';
 import { EditorPanel } from './components/EditorPanel.jsx';
+import { GitPanel } from './components/GitPanel.jsx';
+import { RenderPackagePanel } from './components/RenderPackagePanel.jsx';
+import { TransportBar } from './components/TransportBar.jsx';
+import { ValidationPanel } from './components/ValidationPanel.jsx';
 import { WorkspaceSidebar } from './components/WorkspaceSidebar.jsx';
 import { resolveLinkedEntities } from './utils/context.js';
 import { DEFAULT_THEME_ID, THEMES, normalizeThemeId } from './utils/themes.js';
+import { toggleWorkspaceTool } from './utils/workspaceTools.js';
 
 const THEME_STORAGE_KEY = 'trurl.theme';
 
@@ -22,6 +27,7 @@ function getInitialThemeId() {
 export function App() {
   const [workspace, setWorkspace] = useState(null);
   const [themeId, setThemeId] = useState(getInitialThemeId);
+  const [activeTool, setActiveTool] = useState(null);
   const [activeSection, setActiveSection] = useState('Manuscript');
   const [selectedChapterId, setSelectedChapterId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -205,9 +211,61 @@ export function App() {
   return (
     <div className="app-shell" data-theme={themeId}>
       <header className="topbar">
-        <h1>{workspace?.project?.title || 'TRURL — Local Repository Workspace'}</h1>
+        <h1>TRURL</h1>
         <span className="badge">Mode: {workspace?.mode || 'loading...'}</span>
       </header>
+
+      <TransportBar
+        activeTool={activeTool}
+        currentDocument={workspace?.project?.currentDocument}
+        isDirty={isDirty}
+        isFocusMode={isFocusMode}
+        project={workspace?.project}
+        saveState={saveState}
+        selectedChapter={selectedChapter}
+        themeId={themeId}
+        themes={THEMES}
+        onFocusModeChange={setIsFocusMode}
+        onThemeChange={setThemeId}
+        onToolChange={(toolId) => setActiveTool((currentToolId) => toggleWorkspaceTool(currentToolId, toolId))}
+      />
+
+      {activeTool && (
+        <section className={`workspace-tools-drawer ${isFocusMode ? 'focus-mode' : ''}`}>
+          <div className="workspace-tools-shell">
+            {activeTool === 'render' && (
+              <RenderPackagePanel
+                documentPackage={documentPackage}
+                outputTarget={outputTarget}
+                packageError={packageError}
+                packageState={packageState}
+                selectedChapter={selectedChapter}
+                stylePreset={stylePreset}
+                onBuildPackage={handleBuildPackage}
+                onOutputTargetChange={setOutputTarget}
+                onStylePresetChange={setStylePreset}
+              />
+            )}
+            {activeTool === 'validation' && (
+              <ValidationPanel
+                validationError={validationError}
+                validationResult={validationResult}
+                validationState={validationState}
+                onRunValidation={handleRunValidation}
+              />
+            )}
+            {activeTool === 'git' && (
+              <GitPanel
+                gitDiff={gitDiff}
+                gitError={gitError}
+                gitState={gitState}
+                gitStatus={gitStatus}
+                onGitRequest={handleGitRequest}
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       <main className={`workspace-grid ${isFocusMode ? 'focus-mode' : ''}`}>
         <WorkspaceSidebar
@@ -217,47 +275,25 @@ export function App() {
           selectedChapter={selectedChapter}
           project={workspace?.project}
           sections={workspace?.sections}
-          themeId={themeId}
-          themes={THEMES}
           onActiveSectionChange={setActiveSection}
-          onThemeChange={setThemeId}
         />
         <EditorPanel
           editorBody={editorBody}
           error={error}
           isDirty={isDirty}
           isEditing={isEditing}
-          isFocusMode={isFocusMode}
           saveState={saveState}
           selectedChapter={selectedChapter}
           selectedChapterId={selectedChapterId}
           workspace={workspace}
           onEditorBodyChange={setEditorBody}
-          onFocusModeChange={setIsFocusMode}
           onSave={handleSave}
           onSelectedChapterChange={setSelectedChapterId}
           onToggleEditing={() => setIsEditing((value) => !value)}
         />
         <ContextPanel
-          documentPackage={documentPackage}
-          gitDiff={gitDiff}
-          gitError={gitError}
-          gitState={gitState}
-          gitStatus={gitStatus}
           linked={linked}
-          outputTarget={outputTarget}
-          packageError={packageError}
-          packageState={packageState}
           selectedChapter={selectedChapter}
-          stylePreset={stylePreset}
-          validationError={validationError}
-          validationResult={validationResult}
-          validationState={validationState}
-          onBuildPackage={handleBuildPackage}
-          onGitRequest={handleGitRequest}
-          onOutputTargetChange={setOutputTarget}
-          onRunValidation={handleRunValidation}
-          onStylePresetChange={setStylePreset}
         />
       </main>
     </div>

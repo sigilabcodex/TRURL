@@ -39,13 +39,11 @@ export function EditorPanel({
   error,
   isDirty,
   isEditing,
-  isFocusMode,
   saveState,
   selectedChapter,
   selectedChapterId,
   workspace,
   onEditorBodyChange,
-  onFocusModeChange,
   onSave,
   onSelectedChapterChange,
   onToggleEditing,
@@ -144,13 +142,6 @@ export function EditorPanel({
               : 'Loading repository index...'}
           </p>
         </div>
-        <button
-          className={`focus-toggle ${isFocusMode ? 'active' : ''}`}
-          type="button"
-          onClick={() => onFocusModeChange(!isFocusMode)}
-        >
-          {isFocusMode ? 'Exit Focus' : 'Focus'}
-        </button>
       </div>
 
       {error && <p className="error">Failed to load workspace: {error}</p>}
