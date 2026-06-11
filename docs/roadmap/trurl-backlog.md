@@ -16,7 +16,7 @@ TRURL currently has a working local alpha foundation:
 - `project.currentDocument` metadata exposed by `GET /api/workspace`.
 - Read-only document selector groundwork in the transport bar; real switching remains deferred.
 - Read-only manuscript outliner groundwork for planning and chapter scanning.
-- Chapter metadata normalization/display groundwork; editing remains deferred.
+- Chapter metadata normalization/display groundwork and advisory Metadata Health; editing remains deferred.
 - Mock render package preview for the future TRURL to OSER boundary.
 - Validation panel for frontmatter, cross-reference, and manuscript-order checks.
 - Read-only Git status and scoped diff visibility.
@@ -323,7 +323,7 @@ Verification checklist:
 
 ### E. Chapter/Scene Metadata Groundwork
 
-Status: Read-only normalization and display groundwork is implemented. Editing remains deferred until a safe frontmatter write path is designed.
+Status: Read-only normalization, display, and advisory Metadata Health are implemented. Editing remains deferred until a safe frontmatter write path is designed.
 
 Goal: Design and implement a safe metadata editing path for selected frontmatter fields after schema and UX rules are clear.
 

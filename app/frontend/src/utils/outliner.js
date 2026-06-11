@@ -1,4 +1,5 @@
 import { normalizeChapterMetadata } from './chapterMetadata.js';
+import { getChapterMetadataHealth } from './metadataHealth.js';
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
@@ -16,6 +17,7 @@ export function getChapterWordCount(chapter) {
 export function getOutlinerRows(chapters = []) {
   return toArray(chapters).map((chapter, index) => {
     const metadata = normalizeChapterMetadata(chapter);
+    const health = getChapterMetadataHealth(chapter);
 
     return {
       id: chapter?.id || chapter?.path || String(index),
@@ -30,6 +32,7 @@ export function getOutlinerRows(chapters = []) {
       sourceUrl: metadata.source.url,
       tags: metadata.tags,
       metadataWarnings: metadata.warnings,
+      metadataHealth: health,
       wordCount: getChapterWordCount(chapter),
       linkedCharacters: metadata.participants.characters.length,
       linkedLocations: metadata.participants.locations.length,

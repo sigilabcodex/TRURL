@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { getChapterMetadataRows, normalizeChapterMetadata } from '../utils/chapterMetadata.js';
+import { getChapterMetadataHealth } from '../utils/metadataHealth.js';
 
 export function ContextPanel({
   linked,
@@ -7,6 +8,7 @@ export function ContextPanel({
 }) {
   const metadataRows = useMemo(() => getChapterMetadataRows(selectedChapter), [selectedChapter]);
   const metadata = useMemo(() => normalizeChapterMetadata(selectedChapter), [selectedChapter]);
+  const metadataHealth = useMemo(() => getChapterMetadataHealth(selectedChapter), [selectedChapter]);
 
   return (
     <aside className="panel metadata">
@@ -25,13 +27,21 @@ export function ContextPanel({
           {metadata.revisionNotes !== '—' && (
             <p className="chapter-summary"><strong>Revision notes:</strong> {metadata.revisionNotes}</p>
           )}
-          {metadata.warnings.length > 0 && (
-            <div className="metadata-warnings" aria-label="Metadata notes">
-              {metadata.warnings.map((warning) => (
-                <span key={warning}>{warning}</span>
-              ))}
+          <div className="metadata-health" aria-label="Metadata health">
+            <h4>Metadata Health</h4>
+            <div className="metadata-health-summary">
+              <span className="error">{metadataHealth.summary.error} errors</span>
+              <span className="warning">{metadataHealth.summary.warning} warnings</span>
+              <span className="info">{metadataHealth.summary.info} info</span>
             </div>
-          )}
+            {metadataHealth.issues.length > 0 && (
+              <div className="metadata-health-issues">
+                {metadataHealth.issues.map((issue) => (
+                  <span key={issue.code} className={issue.level}>{issue.label}</span>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       )}
       <section>

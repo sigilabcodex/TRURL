@@ -52,9 +52,27 @@ These fields are safe to display when present and may become editable later afte
 - `summary`: compact chapter or scene summary.
 - `revision_notes`: short editorial note for revision planning.
 
+## Metadata Health
+
+TRURL presents frontend-only Metadata Health as advisory guidance. It is not a replacement for repository validation scripts and does not block save, render, export, or Git actions.
+
+Current issue levels:
+
+- Warning: missing frontmatter `id`.
+- Warning: missing frontmatter `title`.
+- Warning: unknown `type`.
+- Warning: unknown `status`.
+- Info: `source`/`source_text` exists without `source_url`, or `source_url` exists without source text.
+- Info: empty `summary`.
+- Info: no linked characters.
+- Info: no linked locations.
+- Info: no timeline signals.
+
+These issues are intentionally gentle. They make metadata gaps visible in the Inspector, Outliner, and Validation drawer without editing files.
+
 ## Display-Only Rules For Now
 
-- Inspector and Outliner may show supported metadata and gentle warnings.
+- Inspector, Outliner, and Validation drawer may show supported metadata and gentle advisory health notes.
 - Missing `id` or `title` is a display note, not a blocking validation error in the frontend.
 - Unknown `status` or `type` is a display note, not a save blocker.
 - Scalar and array tag forms are normalized for display.
@@ -87,6 +105,7 @@ Fields that affect structure or references should wait for stricter validation a
 This metadata groundwork does not implement:
 
 - Metadata editing.
+- Blocking save/export based on frontend Metadata Health.
 - Frontmatter write APIs.
 - Reordering or drag-and-drop.
 - Document switching.

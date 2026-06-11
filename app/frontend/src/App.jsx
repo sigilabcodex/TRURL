@@ -251,6 +251,7 @@ export function App() {
             )}
             {activeTool === 'validation' && (
               <ValidationPanel
+                chapters={workspace?.chapters || []}
                 validationError={validationError}
                 validationResult={validationResult}
                 validationState={validationState}

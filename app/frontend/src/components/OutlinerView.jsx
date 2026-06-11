@@ -57,7 +57,7 @@ export function OutlinerView({
               <th scope="col">Title</th>
               <th scope="col">Status</th>
               <th scope="col">Words</th>
-              <th scope="col">Metadata</th>
+              <th scope="col">Health</th>
               <th scope="col">Source</th>
               <th scope="col">Path</th>
             </tr>
@@ -88,6 +88,11 @@ export function OutlinerView({
                   <td><span className="outliner-pill">{displayValue(row.status)}</span></td>
                   <td>{formatNumber(row.wordCount)}</td>
                   <td>
+                    <div className="outliner-health" aria-label="Metadata health">
+                      {row.metadataHealth.summary.error > 0 && <span className="error">{row.metadataHealth.summary.error} error</span>}
+                      {row.metadataHealth.summary.warning > 0 && <span className="warning">{row.metadataHealth.summary.warning} warn</span>}
+                      {row.metadataHealth.summary.error === 0 && row.metadataHealth.summary.warning === 0 && <span className="ok">OK</span>}
+                    </div>
                     <div className="outliner-counts" aria-label="Linked context counts">
                       <span>Chars {row.linkedCharacters}</span>
                       <span>Locs {row.linkedLocations}</span>
@@ -96,7 +101,7 @@ export function OutlinerView({
                     <div className="outliner-tags" aria-label="Chapter metadata tags">
                       {row.canon !== '—' && <span>{row.canon}</span>}
                       {row.tags.map((tag) => <span key={tag}>{tag}</span>)}
-                      {row.metadataWarnings.length > 0 && <span className="warning">{row.metadataWarnings.length} note(s)</span>}
+                      {row.metadataHealth.summary.info > 0 && <span className="info">{row.metadataHealth.summary.info} info</span>}
                     </div>
                   </td>
                   <td>

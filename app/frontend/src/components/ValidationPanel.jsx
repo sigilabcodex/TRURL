@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getCheckStatus, summarizeValidation } from '../utils/validationSummary.js';
+import { getProjectMetadataHealth } from '../utils/metadataHealth.js';
 
 const validationActions = [
   { label: 'Run All', endpoint: '/api/validate/all', primary: true },
@@ -16,12 +17,14 @@ function summarizeOutput(output) {
 }
 
 export function ValidationPanel({
+  chapters,
   validationError,
   validationResult,
   validationState,
   onRunValidation,
 }) {
   const validationSummary = validationResult ? summarizeValidation(validationResult) : null;
+  const metadataHealth = useMemo(() => getProjectMetadataHealth(chapters), [chapters]);
 
   return (
     <section className="validation-panel">
@@ -49,6 +52,11 @@ export function ValidationPanel({
             {validationState === 'loading' ? 'Running...' : action.label}
           </button>
         ))}
+      </div>
+
+      <div className="tool-state metadata-health-card">
+        <strong>Frontend metadata health</strong>
+        <p>Advisory only: {metadataHealth.summary.error} errors, {metadataHealth.summary.warning} warnings, {metadataHealth.summary.info} info notes across {metadataHealth.chapters.length} chapter(s).</p>
       </div>
 
       {validationError && (
