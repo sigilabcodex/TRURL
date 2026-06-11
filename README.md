@@ -73,6 +73,8 @@ alias trurl='cd /path/to/TRURL && npm run trurl'
 
 A real global `trurl` binary is intentionally deferred to a future packaging step.
 
+Self-hosted VPS/private-server deployment is planned as a secure, private-by-default profile. The first design drafts live in `docs/deployment/self-hosting.md` and `docs/deployment/security.md`; Docker, authentication, reverse proxy, and deployment files are intentionally deferred. Publicly exposed instances will require HTTPS plus a private network, identity gate, or equivalent access control.
+
 ## Project Manifest
 
 TRURL can read optional project metadata from `.trurl/project.json`. The current repository includes a minimal manifest:

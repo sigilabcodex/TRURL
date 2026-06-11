@@ -58,6 +58,7 @@ TRURL is not yet:
 
 - Document selector and multi-document groundwork: read-only selector is in place; real selection waits until the data model and folder-loading behavior are proven.
 - OSER-backed preview or export bridge: replace mock package behavior with an explicit, testable adapter boundary.
+- Self-hosted secure deployment profile: define a private-by-default VPS/private-server path without changing TRURL into SaaS or a collaborative realtime editor.
 - AI revision proposal endpoint: return structured suggestions and unified diffs only; do not apply changes automatically.
 - Richer editor foundation evaluation: likely CodeMirror as a Markdown source editor before any WYSIWYG or block editor.
 - Better diagnostics presentation: make validation, render, Git output, and metadata notes easier to scan without hiding important failure details.
@@ -428,6 +429,54 @@ Verification checklist:
 - Preview/export diagnostics are explicit.
 - Source files remain unchanged by preview requests.
 
+### I. Self-Hosted Secure Deployment Profile
+
+Goal: Define and document a secure self-hosted deployment profile for running TRURL on a VPS or private server while preserving the repository-first, local-first, Markdown-first architecture.
+
+Scope:
+
+- Docker Compose or equivalent deployment profile.
+- Reverse proxy guidance, preferably Caddy or nginx.
+- HTTPS requirement for exposed deployments.
+- Private-by-default access model.
+- Recommended access patterns:
+  - `localhost` or local network access.
+  - Tailscale/WireGuard private network.
+  - Cloudflare Access or equivalent identity gate.
+  - Optional app-level authentication later.
+- `.env.example` for deployment settings.
+- Clear secret handling rules.
+- Persistent workspace volume strategy.
+- Backup/restore guidance for repositories and configuration.
+- Update path that does not overwrite user repositories.
+
+Files likely touched:
+
+- `docs/deployment/self-hosting.md`
+- `docs/deployment/security.md`
+- `docker-compose.yml`
+- `.env.example`
+- `README.md`
+
+Non-goals:
+
+- No public multi-user SaaS.
+- No open registration.
+- No realtime collaboration.
+- No database-backed workspace model.
+- No arbitrary backend shell command execution.
+- No write-capable Git automation until a dedicated Git workflow is designed.
+- No requirement that TRURL phone home or depend on external cloud services.
+
+Verification checklist:
+
+- Roadmap and deployment docs render as readable Markdown.
+- `npm run check`
+- No runtime behavior changes.
+- No new dependencies unless explicitly approved for the deployment slice.
+- No secrets or environment-specific values committed.
+- Publicly exposed TRURL instances must be protected by a private network, identity gate, or equivalent access control.
+
 ## Safety Rules
 
 - Markdown and frontmatter remain the source of truth.
@@ -437,6 +486,8 @@ Verification checklist:
 - Do not execute arbitrary shell or Git commands from backend requests.
 - Keep Git endpoints read-only until a dedicated Git workflow is designed.
 - Do not let AI write files without explicit user action and a visible diff.
+- Keep deployment private by default; publicly exposed instances require HTTPS plus a private network, identity gate, or equivalent access control.
+- Do not treat self-hosting as a pivot to public SaaS, open registration, or realtime collaboration.
 - Run `npm run check` before commit.
 - Do not modify manuscript or story-bible content during infrastructure, layout, or architecture work.
 - Keep generated outputs and source files clearly separated.
