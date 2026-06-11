@@ -16,6 +16,7 @@ TRURL currently has a working local alpha foundation:
 - `project.currentDocument` metadata exposed by `GET /api/workspace`.
 - Read-only document selector groundwork in the transport bar; real switching remains deferred.
 - Read-only manuscript outliner groundwork for planning and chapter scanning.
+- Chapter metadata normalization/display groundwork; editing remains deferred.
 - Mock render package preview for the future TRURL to OSER boundary.
 - Validation panel for frontmatter, cross-reference, and manuscript-order checks.
 - Read-only Git status and scoped diff visibility.
@@ -59,7 +60,7 @@ TRURL is not yet:
 - OSER-backed preview or export bridge: replace mock package behavior with an explicit, testable adapter boundary.
 - AI revision proposal endpoint: return structured suggestions and unified diffs only; do not apply changes automatically.
 - Richer editor foundation evaluation: likely CodeMirror as a Markdown source editor before any WYSIWYG or block editor.
-- Better diagnostics presentation: make validation, render, and Git output easier to scan without hiding important failure details.
+- Better diagnostics presentation: make validation, render, Git output, and metadata notes easier to scan without hiding important failure details.
 
 ### P2
 
@@ -320,7 +321,9 @@ Verification checklist:
 - Outliner reflects existing workspace data.
 - Selecting a row does not alter save behavior.
 
-### E. Add Chapter/Scene Metadata Editor
+### E. Chapter/Scene Metadata Groundwork
+
+Status: Read-only normalization and display groundwork is implemented. Editing remains deferred until a safe frontmatter write path is designed.
 
 Goal: Design and implement a safe metadata editing path for selected frontmatter fields after schema and UX rules are clear.
 

@@ -57,7 +57,7 @@ export function OutlinerView({
               <th scope="col">Title</th>
               <th scope="col">Status</th>
               <th scope="col">Words</th>
-              <th scope="col">Canon</th>
+              <th scope="col">Metadata</th>
               <th scope="col">Source</th>
               <th scope="col">Path</th>
             </tr>
@@ -93,10 +93,15 @@ export function OutlinerView({
                       <span>Locs {row.linkedLocations}</span>
                       <span>Time {row.timelineSignals}</span>
                     </div>
+                    <div className="outliner-tags" aria-label="Chapter metadata tags">
+                      {row.canon !== '—' && <span>{row.canon}</span>}
+                      {row.tags.map((tag) => <span key={tag}>{tag}</span>)}
+                      {row.metadataWarnings.length > 0 && <span className="warning">{row.metadataWarnings.length} note(s)</span>}
+                    </div>
                   </td>
                   <td>
                     <span>{displayValue(row.sourceText)}</span>
-                    {row.sourceUrl && <code>{row.sourceUrl}</code>}
+                    {row.sourceUrl !== '—' && <code>{row.sourceUrl}</code>}
                   </td>
                   <td><code>{displayValue(row.path)}</code></td>
                 </tr>

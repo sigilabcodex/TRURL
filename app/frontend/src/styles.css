@@ -1679,6 +1679,38 @@ input:focus-visible {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
+.chapter-summary {
+  margin: 0.55rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.metadata-warnings,
+.outliner-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+}
+
+.metadata-warnings span,
+.outliner-tags span {
+  border: 1px solid var(--warning);
+  border-radius: 999px;
+  padding: 0.1rem 0.38rem;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.outliner-tags span:not(.warning) {
+  border-color: var(--border-muted);
+  background: var(--surface-muted);
+  color: var(--text-soft);
+}
+
 @media (max-width: 1320px) {
   .transport-bar {
     grid-template-columns: 1fr;

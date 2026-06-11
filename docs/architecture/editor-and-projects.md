@@ -1,6 +1,6 @@
 # TRURL Editor and Project Architecture
 
-This note evaluates larger editor and document-management choices for TRURL. It does not implement a rich-text editor, project switcher, database, cloud sync, or OSER rendering.
+This note evaluates larger editor and document-management choices for TRURL. It does not implement a rich-text editor, project switcher, database, cloud sync, or OSER rendering. See `chapter-metadata.md` for the read-only chapter metadata display model.
 
 TRURL should remain source-oriented: Markdown manuscript bodies, frontmatter metadata, story-bible records, and Git history are the durable project state. The editor can become more comfortable, but it should not make rendered output or hidden editor state canonical.
 

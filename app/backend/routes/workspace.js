@@ -26,6 +26,7 @@ export async function buildWorkspaceSnapshot(repoRoot) {
       timeline_ids: entry.frontmatter.timeline_ids || [],
       source_text: entry.frontmatter.source_text || null,
       source_url: entry.frontmatter.source_url || null,
+      metadata: { ...entry.frontmatter },
       path: entry.path,
       body: entry.body,
     }))

@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { getChapterMetadataRows, normalizeChapterMetadata } from '../utils/chapterMetadata.js';
 
 export function ContextPanel({
   linked,
   selectedChapter,
 }) {
+  const metadataRows = useMemo(() => getChapterMetadataRows(selectedChapter), [selectedChapter]);
+  const metadata = useMemo(() => normalizeChapterMetadata(selectedChapter), [selectedChapter]);
+
   return (
     <aside className="panel metadata">
       <h2>Inspector</h2>
@@ -11,15 +15,23 @@ export function ContextPanel({
         <section className="chapter-inspector">
           <h3>Selected Chapter</h3>
           <dl>
-            <dt>Title</dt>
-            <dd>{selectedChapter.title}</dd>
-            <dt>Path</dt>
-            <dd><code>{selectedChapter.path}</code></dd>
-            <dt>Status</dt>
-            <dd>{selectedChapter.status}</dd>
-            <dt>Type</dt>
-            <dd>{selectedChapter.type}</dd>
+            {metadataRows.map((row) => (
+              <React.Fragment key={row.key}>
+                <dt>{row.label}</dt>
+                <dd>{row.code ? <code>{row.value}</code> : row.value}</dd>
+              </React.Fragment>
+            ))}
           </dl>
+          {metadata.revisionNotes !== '—' && (
+            <p className="chapter-summary"><strong>Revision notes:</strong> {metadata.revisionNotes}</p>
+          )}
+          {metadata.warnings.length > 0 && (
+            <div className="metadata-warnings" aria-label="Metadata notes">
+              {metadata.warnings.map((warning) => (
+                <span key={warning}>{warning}</span>
+              ))}
+            </div>
+          )}
         </section>
       )}
       <section>

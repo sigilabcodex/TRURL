@@ -1,3 +1,5 @@
+import { normalizeChapterMetadata } from './chapterMetadata.js';
+
 function toArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -12,21 +14,28 @@ export function getChapterWordCount(chapter) {
 }
 
 export function getOutlinerRows(chapters = []) {
-  return toArray(chapters).map((chapter, index) => ({
-    id: chapter?.id || chapter?.path || String(index),
-    order: Number.isFinite(chapter?.order) ? chapter.order : null,
-    index: index + 1,
-    title: chapter?.title || 'Untitled',
-    path: chapter?.path || '',
-    status: chapter?.status || '',
-    type: chapter?.type || '',
-    sourceText: chapter?.source_text || '',
-    sourceUrl: chapter?.source_url || '',
-    wordCount: getChapterWordCount(chapter),
-    linkedCharacters: toArray(chapter?.character_ids).length,
-    linkedLocations: toArray(chapter?.location_ids).length,
-    timelineSignals: toArray(chapter?.timeline_ids).length,
-  }));
+  return toArray(chapters).map((chapter, index) => {
+    const metadata = normalizeChapterMetadata(chapter);
+
+    return {
+      id: chapter?.id || chapter?.path || String(index),
+      order: Number.isFinite(chapter?.order) ? chapter.order : null,
+      index: index + 1,
+      title: metadata.title === '—' ? 'Untitled' : metadata.title,
+      path: chapter?.path || '',
+      status: metadata.status,
+      type: metadata.type,
+      canon: metadata.canon,
+      sourceText: metadata.source.text,
+      sourceUrl: metadata.source.url,
+      tags: metadata.tags,
+      metadataWarnings: metadata.warnings,
+      wordCount: getChapterWordCount(chapter),
+      linkedCharacters: metadata.participants.characters.length,
+      linkedLocations: metadata.participants.locations.length,
+      timelineSignals: metadata.participants.timeline.length,
+    };
+  });
 }
 
 export function summarizeOutliner(rows = []) {

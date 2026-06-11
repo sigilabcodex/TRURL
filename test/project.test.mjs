@@ -251,6 +251,8 @@ test('workspace snapshot includes project metadata', async () => {
   assert.equal(snapshot.project.documents[0].manuscriptPath, 'manuscript');
   assert.deepEqual(snapshot.project.currentDocument, snapshot.project.documents[0]);
   assert.equal(snapshot.project.source, '.trurl/project.json');
+  assert.equal(snapshot.chapters[0].metadata.id, snapshot.chapters[0].id);
+  assert.equal(snapshot.chapters[0].metadata.title, snapshot.chapters[0].title);
   assert.deepEqual(snapshot.project.warnings, []);
   assert.deepEqual(snapshot.project.errors, []);
 });
